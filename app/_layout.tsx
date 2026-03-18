@@ -9,16 +9,24 @@ import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 
 import { db } from '@/db';
-import { categories } from '@/db/schema';
+import { accounts, categories } from '@/db/schema';
 import migrations from '@/db/migrations/migrations';
 import { DEFAULT_CATEGORIES } from '@/constants/categories';
+import { DEFAULT_ACCOUNTS } from '@/constants/accounts';
 
-async function seedDefaultCategories() {
-  const existing = await db.select({ id: categories.id }).from(categories).limit(1);
-  
-  if (existing.length === 0) {
-    await db.insert(categories).values(DEFAULT_CATEGORIES);
-  }
+async function seedDefaults() {
+  const [existingCategories, existingAccounts] = await Promise.all([
+    db.select({ id: categories.id }).from(categories).limit(1),
+    db.select({ id: accounts.id }).from(accounts).limit(1),
+  ]);
+  await Promise.all([
+    existingCategories.length === 0
+      ? db.insert(categories).values(DEFAULT_CATEGORIES)
+      : Promise.resolve(),
+    existingAccounts.length === 0
+      ? db.insert(accounts).values(DEFAULT_ACCOUNTS)
+      : Promise.resolve(),
+  ]);
 }
 
 export default function RootLayout() {
@@ -29,7 +37,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (success) {
-      seedDefaultCategories().catch(console.error);
+      seedDefaults().catch(console.error);
     }
   }, [success]);
 
