@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import { Divider, List, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 export default function SettingsScreen() {
   const theme = useTheme();
@@ -16,15 +17,16 @@ export default function SettingsScreen() {
           <List.Subheader>General</List.Subheader>
           <List.Item
             title="Default Currency"
-            description="USD"
-            left={(props) => <List.Icon {...props} icon="currency-usd" />}
+            description="EUR"
+            left={(props) => <List.Icon {...props} icon="currency-eur" />}
             onPress={() => {}}
           />
           <Divider />
           <List.Item
             title="Categories"
             left={(props) => <List.Icon {...props} icon="tag-multiple-outline" />}
-            onPress={() => {}}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
+            onPress={() => router.push('/categories' as never)}
           />
         </List.Section>
 
