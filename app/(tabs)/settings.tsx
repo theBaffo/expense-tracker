@@ -29,21 +29,6 @@ export default function SettingsScreen() {
             onPress={() => router.push('/categories' as never)}
           />
         </List.Section>
-
-        <List.Section>
-          <List.Subheader>Data</List.Subheader>
-          <List.Item
-            title="Export to CSV"
-            left={(props) => <List.Icon {...props} icon="file-export-outline" />}
-            onPress={() => {}}
-          />
-          <Divider />
-          <List.Item
-            title="Import Data"
-            left={(props) => <List.Icon {...props} icon="file-import-outline" />}
-            onPress={() => {}}
-          />
-        </List.Section>
       </ScrollView>
     </SafeAreaView>
   );
