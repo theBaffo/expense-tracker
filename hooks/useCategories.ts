@@ -6,9 +6,7 @@ import { categories, transactions } from '@/db/schema';
 import type { NewCategory } from '@/db/schema';
 
 export function useCategories() {
-  const { data } = useLiveQuery(
-    db.select().from(categories).orderBy(categories.name),
-  );
+  const { data } = useLiveQuery(db.select().from(categories).orderBy(categories.name));
 
   async function addCategory(values: Omit<NewCategory, 'id'>) {
     await db.insert(categories).values(values);

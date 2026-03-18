@@ -6,7 +6,10 @@ export default function TransactionsScreen() {
   const theme = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['bottom']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={['bottom']}
+    >
       <View style={styles.content}>
         <Text variant="headlineMedium" style={styles.heading}>
           Transactions

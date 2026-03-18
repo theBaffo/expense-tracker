@@ -25,8 +25,7 @@ export default function AccountFormScreen() {
   const isNew = id === 'new';
   const numId = isNew ? null : parseInt(id, 10);
 
-  const { accounts, addAccount, updateAccount, deleteAccount, accountHasActivity } =
-    useAccounts();
+  const { accounts, addAccount, updateAccount, deleteAccount, accountHasActivity } = useAccounts();
 
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('current');
@@ -145,9 +144,7 @@ export default function AccountFormScreen() {
                   style={[
                     styles.typeOption,
                     {
-                      backgroundColor: selected
-                        ? colorHex
-                        : theme.colors.surfaceVariant,
+                      backgroundColor: selected ? colorHex : theme.colors.surfaceVariant,
                       borderWidth: selected ? 0 : 1,
                       borderColor: theme.colors.outline,
                     },
@@ -261,9 +258,7 @@ export default function AccountFormScreen() {
         <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
           <Dialog.Title>Delete Account</Dialog.Title>
           <Dialog.Content>
-            <Text>
-              Are you sure you want to delete "{name}"? This action cannot be undone.
-            </Text>
+            <Text>Are you sure you want to delete "{name}"? This action cannot be undone.</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setDeleteDialogVisible(false)}>Cancel</Button>

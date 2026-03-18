@@ -6,7 +6,10 @@ export default function DashboardScreen() {
   const theme = useTheme();
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['bottom']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={['bottom']}
+    >
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text variant="headlineMedium" style={styles.heading}>
           Dashboard
@@ -42,7 +45,10 @@ export default function DashboardScreen() {
         <Card style={styles.card}>
           <Card.Content>
             <Text variant="titleMedium">Recent Transactions</Text>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}
+            >
               No transactions yet.
             </Text>
           </Card.Content>

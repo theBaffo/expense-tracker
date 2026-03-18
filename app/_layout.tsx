@@ -4,9 +4,8 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
-import { useColorScheme } from 'react-native';
 
 import { db } from '@/db';
 import { accounts, categories } from '@/db/schema';
@@ -19,6 +18,7 @@ async function seedDefaults() {
     db.select({ id: categories.id }).from(categories).limit(1),
     db.select({ id: accounts.id }).from(accounts).limit(1),
   ]);
+
   await Promise.all([
     existingCategories.length === 0
       ? db.insert(categories).values(DEFAULT_CATEGORIES)
@@ -73,19 +73,19 @@ export default function RootLayout() {
   return (
     <PaperProvider theme={theme}>
       <ThemeProvider value={navigationTheme}>
-      <StatusBar style="auto" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          headerStyle: { backgroundColor: theme.colors.surface },
-          headerTintColor: theme.colors.onSurface,
-          headerTitleStyle: { color: theme.colors.onSurface },
-          contentStyle: { backgroundColor: theme.colors.background },
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+        <StatusBar style="auto" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            headerStyle: { backgroundColor: theme.colors.surface },
+            headerTintColor: theme.colors.onSurface,
+            headerTitleStyle: { color: theme.colors.onSurface },
+            contentStyle: { backgroundColor: theme.colors.background },
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="+not-found" />
+        </Stack>
       </ThemeProvider>
     </PaperProvider>
   );

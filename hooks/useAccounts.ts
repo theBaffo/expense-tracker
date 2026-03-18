@@ -6,18 +6,13 @@ import { accounts, transactions, settlements } from '@/db/schema';
 import type { NewAccount } from '@/db/schema';
 
 export function useAccounts() {
-  const { data } = useLiveQuery(
-    db.select().from(accounts).orderBy(accounts.name),
-  );
+  const { data } = useLiveQuery(db.select().from(accounts).orderBy(accounts.name));
 
   async function addAccount(values: Omit<NewAccount, 'id' | 'createdAt'>) {
     await db.insert(accounts).values(values);
   }
 
-  async function updateAccount(
-    id: number,
-    values: Partial<Omit<NewAccount, 'id' | 'createdAt'>>,
-  ) {
+  async function updateAccount(id: number, values: Partial<Omit<NewAccount, 'id' | 'createdAt'>>) {
     await db.update(accounts).set(values).where(eq(accounts.id, id));
   }
 

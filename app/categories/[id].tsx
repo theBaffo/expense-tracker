@@ -36,7 +36,7 @@ export default function CategoryFormScreen() {
   useEffect(() => {
     if (numId == null) return;
     const category = categories.find((c) => c.id === numId);
-    
+
     if (category) {
       setName(category.name);
       setColorHex(category.colorHex);
@@ -48,7 +48,7 @@ export default function CategoryFormScreen() {
     if (!name.trim()) return;
 
     setSaving(true);
-    
+
     try {
       if (isNew) {
         await addCategory({ name: name.trim(), icon, colorHex });
@@ -64,9 +64,9 @@ export default function CategoryFormScreen() {
 
   async function handleDeletePress() {
     if (numId == null) return;
-    
+
     const hasTransactions = await categoryHasTransactions(numId);
-    
+
     if (hasTransactions) {
       setDeleteBlockedDialogVisible(true);
     } else {
@@ -76,7 +76,7 @@ export default function CategoryFormScreen() {
 
   async function handleConfirmDelete() {
     if (numId == null) return;
-    
+
     setDeleteDialogVisible(false);
     await deleteCategory(numId);
     router.back();
@@ -87,7 +87,9 @@ export default function CategoryFormScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
     >
-      <Stack.Screen options={{ title: isNew ? 'New Category' : 'Edit Category', headerShown: true }} />
+      <Stack.Screen
+        options={{ title: isNew ? 'New Category' : 'Edit Category', headerShown: true }}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* Preview */}
@@ -152,8 +154,7 @@ export default function CategoryFormScreen() {
                 style={[
                   styles.iconOption,
                   {
-                    backgroundColor:
-                      icon === iconName ? colorHex : theme.colors.surfaceVariant,
+                    backgroundColor: icon === iconName ? colorHex : theme.colors.surfaceVariant,
                   },
                 ]}
               >
@@ -192,15 +193,10 @@ export default function CategoryFormScreen() {
       </ScrollView>
 
       <Portal>
-        <Dialog
-          visible={deleteDialogVisible}
-          onDismiss={() => setDeleteDialogVisible(false)}
-        >
+        <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
           <Dialog.Title>Delete Category</Dialog.Title>
           <Dialog.Content>
-            <Text>
-              Are you sure you want to delete "{name}"? This action cannot be undone.
-            </Text>
+            <Text>Are you sure you want to delete "{name}"? This action cannot be undone.</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setDeleteDialogVisible(false)}>Cancel</Button>
@@ -216,9 +212,7 @@ export default function CategoryFormScreen() {
         >
           <Dialog.Title>Cannot Delete</Dialog.Title>
           <Dialog.Content>
-            <Text>
-              "{name}" has transactions linked to it and cannot be deleted.
-            </Text>
+            <Text>"{name}" has transactions linked to it and cannot be deleted.</Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setDeleteBlockedDialogVisible(false)}>OK</Button>
