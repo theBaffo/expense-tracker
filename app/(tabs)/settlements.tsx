@@ -1,40 +1,34 @@
 import { SectionList, StyleSheet, View } from 'react-native';
-import { Divider, FAB, Icon, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Divider, FAB, Icon, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
-import { useTransactions, type TransactionRow } from '@/hooks/useTransactions';
+import { useSettlements, type SettlementRow } from '@/hooks/useSettlements';
+import { fmtAmount } from '@/utils/currency';
 import { formatSectionDate } from '@/utils/date';
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-type Section = { title: string; data: TransactionRow[] };
+type Section = { title: string; data: SettlementRow[] };
 
-function groupByDate(rows: TransactionRow[]): Section[] {
-  const map = new Map<string, TransactionRow[]>();
-  for (const tx of rows) {
-    if (!map.has(tx.transactionDate)) map.set(tx.transactionDate, []);
-    map.get(tx.transactionDate)!.push(tx);
+function groupByDate(rows: SettlementRow[]): Section[] {
+  const map = new Map<string, SettlementRow[]>();
+  for (const stl of rows) {
+    if (!map.has(stl.settlementDate)) map.set(stl.settlementDate, []);
+    map.get(stl.settlementDate)!.push(stl);
   }
-  return Array.from(map.entries()).map(([date, data]) => ({
-    title: formatSectionDate(date),
-    data,
-  }));
-}
-
-// ─── Amount formatter ─────────────────────────────────────────────────────────
-
-function formatAmount(amount: number, currency: string | null): string {
-  const sign = amount < 0 ? '−' : '+';
-  return `${sign}${Math.abs(amount).toFixed(2)} ${currency ?? ''}`.trim();
+  // Descending order (most recent first)
+  return Array.from(map.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([date, data]) => ({ title: formatSectionDate(date), data }));
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function TransactionsScreen() {
+export default function SettlementsScreen() {
   const theme = useTheme();
-  const { transactions } = useTransactions();
-  const sections = groupByDate(transactions);
+  const { settlements } = useSettlements();
+  const sections = groupByDate(settlements);
 
   return (
     <SafeAreaView
@@ -42,13 +36,13 @@ export default function TransactionsScreen() {
       edges={['bottom']}
     >
       <Text variant="headlineMedium" style={styles.heading}>
-        Transactions
+        Settlements
       </Text>
 
-      {transactions.length === 0 ? (
+      {settlements.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            No transactions yet.
+            No settlements yet.
           </Text>
         </View>
       ) : (
@@ -66,35 +60,27 @@ export default function TransactionsScreen() {
           )}
           renderItem={({ item, index, section }) => (
             <>
-              <TouchableRipple onPress={() => router.push(`/transactions/${item.id}` as never)}>
-                <View style={styles.row}>
-                  <View
-                    style={[
-                      styles.iconBadge,
-                      { backgroundColor: item.categoryColorHex ?? theme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <Icon source={item.categoryIcon ?? 'tag-outline'} size={18} color="white" />
-                  </View>
-                  <View style={styles.rowContent}>
-                    <Text variant="bodyMedium" numberOfLines={1}>
-                      {item.description}
-                    </Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                      {item.accountName}
-                    </Text>
-                  </View>
-                  <Text
-                    variant="bodyMedium"
-                    style={{
-                      color: item.amount < 0 ? theme.colors.error : '#43A047',
-                      fontVariant: ['tabular-nums'],
-                    }}
-                  >
-                    {formatAmount(item.amount, item.accountCurrency)}
+              <View style={styles.row}>
+                <View
+                  style={[
+                    styles.iconBadge,
+                    { backgroundColor: item.toAccountColorHex ?? '#6750A4' },
+                  ]}
+                >
+                  <Icon source="credit-card-outline" size={18} color="white" />
+                </View>
+                <View style={styles.rowContent}>
+                  <Text variant="bodyMedium" numberOfLines={1}>
+                    {item.toAccountName ?? '?'}
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    from {item.fromAccountName ?? '?'}
                   </Text>
                 </View>
-              </TouchableRipple>
+                <Text variant="bodyMedium" style={{ fontVariant: ['tabular-nums'] }}>
+                  {fmtAmount(item.amount, item.toAccountCurrency)}
+                </Text>
+              </View>
               {index < section.data.length - 1 && <Divider />}
             </>
           )}
@@ -105,7 +91,7 @@ export default function TransactionsScreen() {
         icon="plus"
         style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
         color={theme.colors.onPrimaryContainer}
-        onPress={() => router.push('/transactions/new' as never)}
+        onPress={() => router.push('/settlements/pay-bill' as never)}
       />
     </SafeAreaView>
   );

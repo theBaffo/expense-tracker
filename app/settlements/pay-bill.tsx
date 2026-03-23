@@ -25,27 +25,33 @@ import { isValidDate, defaultSettlementDate } from '@/utils/date';
 
 export default function PayBillScreen() {
   const theme = useTheme();
-  const { creditCardId } = useLocalSearchParams<{ creditCardId: string }>();
-  const numCreditCardId = parseInt(creditCardId, 10);
+  // creditCardId is optional — present when navigating from account detail, absent from FAB
+  const { creditCardId } = useLocalSearchParams<{ creditCardId?: string }>();
+  const initialCreditCardId = creditCardId ? parseInt(creditCardId, 10) : null;
 
   const { accounts } = useAccounts();
   const { addSettlement } = useSettlements();
   const { accountsWithBalance } = useDashboard();
 
-  const creditCard = accounts.find((a) => a.id === numCreditCardId);
-  const outstandingBalance =
-    accountsWithBalance.find((a) => a.id === numCreditCardId)?.balance ?? 0;
-
-  // Only non-credit-card accounts can be the source of a payment
+  const creditCards = accounts.filter((a) => a.type === 'credit_card');
   const sourceAccounts = accounts.filter((a) => a.type !== 'credit_card');
 
   // ── Form state ──────────────────────────────────────────────────────────────
+  const [toAccountId, setToAccountId] = useState<number | null>(initialCreditCardId);
   const [fromAccountId, setFromAccountId] = useState<number | null>(null);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(defaultSettlementDate);
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [toPickerVisible, setToPickerVisible] = useState(false);
   const [fromPickerVisible, setFromPickerVisible] = useState(false);
+
+  // Auto-fill amount from outstanding balance whenever the credit card changes
+  useEffect(() => {
+    if (toAccountId === null || amount !== '') return;
+    const balance = accountsWithBalance.find((a) => a.id === toAccountId)?.balance ?? 0;
+    if (balance > 0) setAmount(balance.toFixed(2));
+  }, [toAccountId, accountsWithBalance, amount]);
 
   // Pre-select default "from" account: prefer 'current', then first available
   useEffect(() => {
@@ -55,27 +61,32 @@ export default function PayBillScreen() {
     }
   }, [sourceAccounts, fromAccountId]);
 
-  // Pre-fill amount with the full outstanding balance once it loads
-  useEffect(() => {
-    if (outstandingBalance > 0 && amount === '') {
-      setAmount(outstandingBalance.toFixed(2));
-    }
-  }, [outstandingBalance, amount]);
-
   // ── Derived ─────────────────────────────────────────────────────────────────
+  const selectedCreditCard = accounts.find((a) => a.id === toAccountId);
   const selectedFromAccount = accounts.find((a) => a.id === fromAccountId);
+  const outstandingBalance = accountsWithBalance.find((a) => a.id === toAccountId)?.balance ?? 0;
 
   const canSave =
-    fromAccountId !== null && amount.length > 0 && parseFloat(amount) > 0 && isValidDate(date);
+    toAccountId !== null &&
+    fromAccountId !== null &&
+    amount.length > 0 &&
+    parseFloat(amount) > 0 &&
+    isValidDate(date);
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
+  function selectCreditCard(id: number) {
+    setToAccountId(id);
+    setAmount(''); // clear so the auto-fill effect re-runs for the new card
+    setToPickerVisible(false);
+  }
+
   async function handleSave() {
-    if (!canSave || !fromAccountId) return;
+    if (!canSave || !toAccountId || !fromAccountId) return;
     setSaving(true);
     try {
       await addSettlement({
         fromAccountId,
-        toAccountId: numCreditCardId,
+        toAccountId,
         amount: parseFloat(amount),
         settlementDate: date,
         notes: notes.trim() || null,
@@ -97,22 +108,45 @@ export default function PayBillScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Credit card summary */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceVariant }]}>
-          <View style={[styles.badge, { backgroundColor: creditCard?.colorHex ?? '#6750A4' }]}>
+          <View
+            style={[styles.badge, { backgroundColor: selectedCreditCard?.colorHex ?? '#6750A4' }]}
+          >
             <Icon source="credit-card-outline" size={20} color="white" />
           </View>
           <View style={styles.flex1}>
-            <Text variant="titleMedium">{creditCard?.name ?? '…'}</Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              Outstanding balance
-            </Text>
+            <Text variant="titleMedium">{selectedCreditCard?.name ?? 'Select a credit card'}</Text>
+            {selectedCreditCard != null && (
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                Outstanding balance
+              </Text>
+            )}
           </View>
-          <Text
-            variant="titleMedium"
-            style={{ color: outstandingBalance > 0 ? theme.colors.error : theme.colors.onSurface }}
-          >
-            {fmtAmount(outstandingBalance, creditCard?.currency)}
-          </Text>
+          {selectedCreditCard != null && (
+            <Text
+              variant="titleMedium"
+              style={{
+                color: outstandingBalance > 0 ? theme.colors.error : theme.colors.onSurface,
+              }}
+            >
+              {fmtAmount(outstandingBalance, selectedCreditCard.currency)}
+            </Text>
+          )}
         </View>
+
+        {/* Credit card picker */}
+        <Pressable onPress={() => setToPickerVisible(true)}>
+          <View pointerEvents="none">
+            <TextInput
+              label="Credit Card *"
+              value={selectedCreditCard?.name ?? ''}
+              mode="outlined"
+              editable={false}
+              style={styles.input}
+              right={<TextInput.Icon icon="chevron-down" />}
+              placeholder="Select a credit card"
+            />
+          </View>
+        </Pressable>
 
         {/* Amount */}
         <TextInput
@@ -183,6 +217,46 @@ export default function PayBillScreen() {
       </ScrollView>
 
       <Portal>
+        {/* Credit card picker dialog */}
+        <Dialog visible={toPickerVisible} onDismiss={() => setToPickerVisible(false)}>
+          <Dialog.Title>Credit Card to Pay</Dialog.Title>
+          <Dialog.ScrollArea style={styles.dialogScrollArea}>
+            <ScrollView>
+              <RadioButton.Group
+                value={toAccountId !== null ? String(toAccountId) : ''}
+                onValueChange={(v) => selectCreditCard(parseInt(v, 10))}
+              >
+                {creditCards.map((account) => {
+                  const balance =
+                    accountsWithBalance.find((a) => a.id === account.id)?.balance ?? 0;
+                  return (
+                    <TouchableRipple key={account.id} onPress={() => selectCreditCard(account.id)}>
+                      <View style={styles.pickerRow}>
+                        <View style={[styles.pickerBadge, { backgroundColor: account.colorHex }]}>
+                          <Icon source="credit-card-outline" size={14} color="white" />
+                        </View>
+                        <Text style={styles.pickerLabel}>{account.name}</Text>
+                        <Text
+                          variant="bodySmall"
+                          style={{
+                            color: balance > 0 ? theme.colors.error : theme.colors.onSurfaceVariant,
+                          }}
+                        >
+                          {fmtAmount(balance, account.currency)}
+                        </Text>
+                        <RadioButton value={String(account.id)} />
+                      </View>
+                    </TouchableRipple>
+                  );
+                })}
+              </RadioButton.Group>
+            </ScrollView>
+          </Dialog.ScrollArea>
+          <Dialog.Actions>
+            <Button onPress={() => setToPickerVisible(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+
         {/* From account picker dialog */}
         <Dialog visible={fromPickerVisible} onDismiss={() => setFromPickerVisible(false)}>
           <Dialog.Title>From Account</Dialog.Title>
