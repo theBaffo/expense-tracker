@@ -38,6 +38,13 @@ export function useSettlements() {
     await db.insert(settlements).values(values);
   }
 
+  async function updateSettlement(
+    id: number,
+    values: Partial<Omit<NewSettlement, 'id' | 'createdAt'>>,
+  ) {
+    await db.update(settlements).set(values).where(eq(settlements.id, id));
+  }
+
   async function deleteSettlement(id: number) {
     await db.delete(settlements).where(eq(settlements.id, id));
   }
@@ -45,6 +52,7 @@ export function useSettlements() {
   return {
     settlements: data ?? [],
     addSettlement,
+    updateSettlement,
     deleteSettlement,
   };
 }

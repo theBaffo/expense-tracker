@@ -1,5 +1,5 @@
 import { SectionList, StyleSheet, View } from 'react-native';
-import { Divider, FAB, Icon, Text, useTheme } from 'react-native-paper';
+import { Divider, FAB, Icon, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -60,27 +60,29 @@ export default function SettlementsScreen() {
           )}
           renderItem={({ item, index, section }) => (
             <>
-              <View style={styles.row}>
-                <View
-                  style={[
-                    styles.iconBadge,
-                    { backgroundColor: item.toAccountColorHex ?? '#6750A4' },
-                  ]}
-                >
-                  <Icon source="credit-card-outline" size={18} color="white" />
-                </View>
-                <View style={styles.rowContent}>
-                  <Text variant="bodyMedium" numberOfLines={1}>
-                    {item.toAccountName ?? '?'}
+              <TouchableRipple onPress={() => router.push(`/settlements/${item.id}` as never)}>
+                <View style={styles.row}>
+                  <View
+                    style={[
+                      styles.iconBadge,
+                      { backgroundColor: item.toAccountColorHex ?? '#6750A4' },
+                    ]}
+                  >
+                    <Icon source="credit-card-outline" size={18} color="white" />
+                  </View>
+                  <View style={styles.rowContent}>
+                    <Text variant="bodyMedium" numberOfLines={1}>
+                      {item.toAccountName ?? '?'}
+                    </Text>
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      from {item.fromAccountName ?? '?'}
+                    </Text>
+                  </View>
+                  <Text variant="bodyMedium" style={{ fontVariant: ['tabular-nums'] }}>
+                    {fmtAmount(item.amount, item.toAccountCurrency)}
                   </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    from {item.fromAccountName ?? '?'}
-                  </Text>
                 </View>
-                <Text variant="bodyMedium" style={{ fontVariant: ['tabular-nums'] }}>
-                  {fmtAmount(item.amount, item.toAccountCurrency)}
-                </Text>
-              </View>
+              </TouchableRipple>
               {index < section.data.length - 1 && <Divider />}
             </>
           )}
@@ -88,7 +90,7 @@ export default function SettlementsScreen() {
       )}
 
       <FAB
-        icon="plus"
+        icon="credit-card-check-outline"
         style={[styles.fab, { backgroundColor: theme.colors.primaryContainer }]}
         color={theme.colors.onPrimaryContainer}
         onPress={() => router.push('/settlements/pay-bill' as never)}
