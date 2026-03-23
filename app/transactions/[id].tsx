@@ -18,18 +18,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const d = new Date(value);
-  return !isNaN(d.getTime());
-}
+import { todayISO, isValidDate } from '@/utils/date';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 

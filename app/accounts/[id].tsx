@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
+  Divider,
   Icon,
   Portal,
   Text,
@@ -14,8 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 
 import { useAccounts } from '@/hooks/useAccounts';
+import { useSettlements } from '@/hooks/useSettlements';
+import { useDashboard } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { PRESET_COLORS } from '@/constants/categories';
+import { fmtAmount } from '@/utils/currency';
+import { fmtShortDate } from '@/utils/date';
 
 type AccountType = 'current' | 'credit_card' | 'savings' | 'cash';
 
@@ -26,6 +31,8 @@ export default function AccountFormScreen() {
   const numId = isNew ? null : parseInt(id, 10);
 
   const { accounts, addAccount, updateAccount, deleteAccount, accountHasActivity } = useAccounts();
+  const { settlements } = useSettlements();
+  const { accountsWithBalance } = useDashboard();
 
   const [name, setName] = useState('');
   const [type, setType] = useState<AccountType>('current');
@@ -92,6 +99,13 @@ export default function AccountFormScreen() {
   }
 
   const currentTypeMeta = ACCOUNT_TYPE_META.find((m) => m.value === type);
+
+  // Credit-card computed values (only meaningful in edit mode)
+  const showCreditCardSection = !isNew && type === 'credit_card' && numId != null;
+  const outstandingBalance = accountsWithBalance.find((a) => a.id === numId)?.balance ?? 0;
+  const accountSettlements = settlements
+    .filter((s) => s.toAccountId === numId)
+    .sort((a, b) => b.settlementDate.localeCompare(a.settlementDate));
 
   return (
     <SafeAreaView
@@ -252,6 +266,66 @@ export default function AccountFormScreen() {
             Delete Account
           </Button>
         )}
+
+        {/* ── Credit card: outstanding balance + pay bill ─────────────── */}
+        {showCreditCardSection && (
+          <>
+            <Divider style={styles.sectionDivider} />
+
+            <View style={styles.balanceRow}>
+              <Text variant="labelLarge" style={styles.sectionLabel}>
+                Outstanding Balance
+              </Text>
+              <Text
+                variant="titleMedium"
+                style={{
+                  color: outstandingBalance > 0 ? theme.colors.error : theme.colors.onSurface,
+                }}
+              >
+                {fmtAmount(outstandingBalance, currency)}
+              </Text>
+            </View>
+
+            {outstandingBalance > 0 && (
+              <Button
+                mode="outlined"
+                icon="credit-card-check-outline"
+                onPress={() =>
+                  router.push({
+                    pathname: '/settlements/pay-bill' as never,
+                    params: { creditCardId: numId! },
+                  })
+                }
+                style={styles.payBillButton}
+              >
+                Pay Bill
+              </Button>
+            )}
+
+            {/* ── Settlement history ──────────────────────────────────── */}
+            {accountSettlements.length > 0 && (
+              <>
+                <Text variant="labelLarge" style={[styles.sectionLabel, styles.historyLabel]}>
+                  Settlement History
+                </Text>
+                {accountSettlements.map((stl, index) => (
+                  <View key={stl.id}>
+                    {index > 0 && <Divider style={styles.divider} />}
+                    <View style={styles.settlementRow}>
+                      <View style={styles.flex1}>
+                        <Text variant="bodyMedium">{stl.fromAccountName ?? '?'}</Text>
+                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                          {fmtShortDate(stl.settlementDate)}
+                        </Text>
+                      </View>
+                      <Text variant="bodyMedium">{fmtAmount(stl.amount, currency)}</Text>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
+          </>
+        )}
       </ScrollView>
 
       <Portal>
@@ -353,4 +427,29 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginBottom: 8,
   },
+  sectionDivider: {
+    marginVertical: 20,
+  },
+  balanceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  payBillButton: {
+    marginBottom: 20,
+  },
+  historyLabel: {
+    marginTop: 4,
+  },
+  divider: {
+    marginVertical: 6,
+  },
+  settlementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
+  },
+  flex1: { flex: 1 },
 });

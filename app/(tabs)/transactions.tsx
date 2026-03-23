@@ -4,10 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { useTransactions, type TransactionRow } from '@/hooks/useTransactions';
+import { todayISO } from '@/utils/date';
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = todayISO();
 const YESTERDAY = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
 
 function formatSectionDate(iso: string): string {

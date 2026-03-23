@@ -44,6 +44,7 @@ export function useDashboard() {
         settlementDate: settlements.settlementDate,
         fromAccountName: fromAcc.name,
         toAccountName: toAcc.name,
+        toAccountCurrency: toAcc.currency,
       })
       .from(settlements)
       .leftJoin(fromAcc, eq(settlements.fromAccountId, fromAcc.id))

@@ -4,34 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useDashboard } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
-
-// ─── Formatters ───────────────────────────────────────────────────────────────
-
-const CURRENCY_SYMBOL: Record<string, string> = {
-  EUR: '€',
-  USD: '$',
-  GBP: '£',
-  JPY: '¥',
-  CHF: 'Fr',
-};
-
-function currencySymbol(code: string | null | undefined): string {
-  return CURRENCY_SYMBOL[code ?? 'EUR'] ?? code ?? '€';
-}
-
-function fmtAmount(amount: number, currency?: string | null): string {
-  return `${currencySymbol(currency)}${Math.abs(amount).toFixed(2)}`;
-}
-
-function fmtMonth(ym: string): string {
-  const [y, m] = ym.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-}
-
-function fmtShortDate(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-}
+import { fmtAmount } from '@/utils/currency';
+import { fmtShortDate, fmtMonth } from '@/utils/date';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -214,19 +188,17 @@ export default function DashboardScreen() {
                   {index > 0 && <Divider style={styles.divider} />}
                   <View style={styles.row}>
                     <Icon
-                      source="swap-horizontal"
+                      source="credit-card-outline"
                       size={24}
                       color={theme.colors.onSurfaceVariant}
                     />
                     <View style={styles.flex1}>
-                      <Text variant="bodyMedium">
-                        {stl.fromAccountName ?? '?'} → {stl.toAccountName ?? '?'}
-                      </Text>
+                      <Text variant="bodyMedium">{stl.toAccountName ?? '?'}</Text>
                       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                        {fmtShortDate(stl.settlementDate)}
+                        Due {fmtShortDate(stl.settlementDate)}
                       </Text>
                     </View>
-                    <Text variant="bodyMedium">€{stl.amount.toFixed(2)}</Text>
+                    <Text variant="bodyMedium">{fmtAmount(stl.amount, stl.toAccountCurrency)}</Text>
                   </View>
                 </View>
               ))}
