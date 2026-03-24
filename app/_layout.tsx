@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { useFonts } from 'expo-font';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -6,14 +8,15 @@ import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
-import { registerAllTranslations } from '@/utils/locale';
+import { en, registerTranslation } from 'react-native-paper-dates';
 import { db } from '@/db';
 import { accounts, categories } from '@/db/schema';
 import migrations from '@/db/migrations/migrations';
 import { DEFAULT_CATEGORIES } from '@/constants/categories';
 import { DEFAULT_ACCOUNTS } from '@/constants/accounts';
 
-registerAllTranslations();
+// TODO: use registerAllTranslations when app will be fully localized
+registerTranslation('en', en);
 
 async function seedDefaults() {
   const [existingCategories, existingAccounts] = await Promise.all([
@@ -35,6 +38,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
+  const [fontsLoaded] = useFonts(MaterialCommunityIcons.font);
   const { success, error } = useMigrations(db, migrations);
 
   useEffect(() => {
@@ -55,10 +59,10 @@ export default function RootLayout() {
     );
   }
 
-  if (!success) {
+  if (!success || !fontsLoaded) {
     return (
       <View style={styles.centered}>
-        <Text>Loading database…</Text>
+        <Text>Loading…</Text>
       </View>
     );
   }

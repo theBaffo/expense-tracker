@@ -18,10 +18,10 @@ export function fmtMonth(ym: string): string {
   return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
-/** Returns "YYYY-MM-15" for the month following the current one. */
+/** Returns "YYYY-MM-15" of the current month. */
 export function defaultSettlementDate(): string {
   const now = new Date();
-  return dateToISO(new Date(now.getFullYear(), now.getMonth() + 1, 15));
+  return dateToISO(new Date(now.getFullYear(), now.getMonth(), 15));
 }
 
 export function formatSectionDate(iso: string): string {
