@@ -1,8 +1,12 @@
 import { dateToISO, isoToDate } from '@/utils/date';
+import { resolvePickerLocale } from '@/utils/locale';
+import { getLocales } from 'expo-localization';
 import { useState } from 'react';
 import { Pressable, StyleProp, View, ViewStyle } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
+
+const locale = resolvePickerLocale(getLocales()[0]?.languageTag ?? 'en');
 
 interface Props {
   label: string;
@@ -35,7 +39,7 @@ export function DatePickerField({ label, value, onChange, style }: Props) {
       </Pressable>
 
       <DatePickerModal
-        locale="en"
+        locale={locale}
         mode="single"
         visible={visible}
         onDismiss={() => setVisible(false)}

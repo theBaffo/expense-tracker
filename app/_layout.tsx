@@ -6,14 +6,14 @@ import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
-import { en, registerTranslation } from 'react-native-paper-dates';
+import { registerAllTranslations } from '@/utils/locale';
 import { db } from '@/db';
 import { accounts, categories } from '@/db/schema';
 import migrations from '@/db/migrations/migrations';
 import { DEFAULT_CATEGORIES } from '@/constants/categories';
 import { DEFAULT_ACCOUNTS } from '@/constants/accounts';
 
-registerTranslation('en', en);
+registerAllTranslations();
 
 async function seedDefaults() {
   const [existingCategories, existingAccounts] = await Promise.all([
