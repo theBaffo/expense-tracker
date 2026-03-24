@@ -21,6 +21,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { fmtAmount } from '@/utils/currency';
 import { DatePickerField } from '@/components/DatePickerField';
+import { previousMonthISO } from '@/utils/date';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ export default function EditSettlementScreen() {
 
   const { accounts } = useAccounts();
   const { settlements, updateSettlement, deleteSettlement } = useSettlements();
-  const { accountsWithBalance } = useDashboard();
+  const { accountsWithBalance } = useDashboard(previousMonthISO());
 
   const creditCards = accounts.filter((a) => a.type === 'credit_card');
   const sourceAccounts = accounts.filter((a) => a.type !== 'credit_card');

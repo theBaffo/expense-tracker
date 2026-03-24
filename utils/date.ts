@@ -18,6 +18,12 @@ export function fmtMonth(ym: string): string {
   return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 }
 
+/** Returns "YYYY-MM" of the previous month. */
+export function previousMonthISO(): string {
+  const now = new Date();
+  return dateToISO(new Date(now.getFullYear(), now.getMonth() - 1, 1)).slice(0, 7);
+}
+
 /** Returns "YYYY-MM-15" of the current month. */
 export function defaultSettlementDate(): string {
   const now = new Date();

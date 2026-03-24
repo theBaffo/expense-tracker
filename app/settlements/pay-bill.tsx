@@ -20,7 +20,7 @@ import { useSettlements } from '@/hooks/useSettlements';
 import { useDashboard } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { fmtAmount } from '@/utils/currency';
-import { defaultSettlementDate } from '@/utils/date';
+import { defaultSettlementDate, previousMonthISO } from '@/utils/date';
 import { DatePickerField } from '@/components/DatePickerField';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ export default function PayBillScreen() {
 
   const { accounts } = useAccounts();
   const { addSettlement } = useSettlements();
-  const { accountsWithBalance } = useDashboard();
+  const { accountsWithBalance } = useDashboard(previousMonthISO());
 
   const creditCards = accounts.filter((a) => a.type === 'credit_card');
   const sourceAccounts = accounts.filter((a) => a.type !== 'credit_card');
