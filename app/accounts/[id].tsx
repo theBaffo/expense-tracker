@@ -212,15 +212,17 @@ export default function AccountFormScreen() {
           ))}
         </View>
 
-        {/* Starting balance */}
-        <TextInput
-          label="Starting Balance"
-          value={startingBalance}
-          onChangeText={setStartingBalance}
-          mode="outlined"
-          style={styles.input}
-          keyboardType="numeric"
-        />
+        {/* Starting balance (not applicable for credit cards) */}
+        {type !== 'credit_card' && (
+          <TextInput
+            label="Starting Balance"
+            value={startingBalance}
+            onChangeText={setStartingBalance}
+            mode="outlined"
+            style={styles.input}
+            keyboardType="numeric"
+          />
+        )}
 
         {/* Credit limit (credit card only) */}
         {type === 'credit_card' && (
