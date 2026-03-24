@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
   Dialog,
@@ -122,7 +123,10 @@ export default function TransactionFormScreen() {
         options={{ title: isNew ? 'New Transaction' : 'Edit Transaction', headerShown: true }}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Expense / Income toggle */}
         <SegmentedButtons
           value={isExpense ? 'expense' : 'income'}
@@ -226,7 +230,7 @@ export default function TransactionFormScreen() {
             Delete Transaction
           </Button>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Portal>
         {/* Account picker dialog */}

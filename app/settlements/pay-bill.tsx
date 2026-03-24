@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
   Dialog,
@@ -111,7 +112,10 @@ export default function PayBillScreen() {
     >
       <Stack.Screen options={{ title: 'Pay Bill', headerShown: true }} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Credit card summary */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceVariant }]}>
           <View
@@ -215,7 +219,7 @@ export default function PayBillScreen() {
         >
           Pay Bill
         </Button>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Portal>
         {/* Credit card picker dialog */}

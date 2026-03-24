@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
   Dialog,
@@ -91,7 +92,10 @@ export default function CategoryFormScreen() {
         options={{ title: isNew ? 'New Category' : 'Edit Category', headerShown: true }}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Preview */}
         <View style={styles.preview}>
           <View style={[styles.previewBadge, { backgroundColor: colorHex }]}>
@@ -190,7 +194,7 @@ export default function CategoryFormScreen() {
             Delete Category
           </Button>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Portal>
         <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>

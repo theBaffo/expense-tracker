@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
   Dialog,
@@ -107,7 +108,10 @@ export default function EditSettlementScreen() {
     >
       <Stack.Screen options={{ title: 'Edit Settlement', headerShown: true }} />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Credit card summary */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.surfaceVariant }]}>
           <View
@@ -220,7 +224,7 @@ export default function EditSettlementScreen() {
         >
           Delete Settlement
         </Button>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Portal>
         {/* Credit card picker dialog */}

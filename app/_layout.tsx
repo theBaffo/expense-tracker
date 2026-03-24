@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { en, registerTranslation } from 'react-native-paper-dates';
 import { db } from '@/db';
 import migrations from '@/db/migrations/migrations';
@@ -59,23 +60,25 @@ export default function RootLayout() {
   };
 
   return (
-    <PaperProvider theme={theme}>
-      <ThemeProvider value={navigationTheme}>
-        <StatusBar style="auto" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            headerStyle: { backgroundColor: theme.colors.surface },
-            headerTintColor: theme.colors.onSurface,
-            headerTitleStyle: { color: theme.colors.onSurface },
-            contentStyle: { backgroundColor: theme.colors.background },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </ThemeProvider>
-    </PaperProvider>
+    <KeyboardProvider>
+      <PaperProvider theme={theme}>
+        <ThemeProvider value={navigationTheme}>
+          <StatusBar style="auto" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              headerStyle: { backgroundColor: theme.colors.surface },
+              headerTintColor: theme.colors.onSurface,
+              headerTitleStyle: { color: theme.colors.onSurface },
+              contentStyle: { backgroundColor: theme.colors.background },
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </ThemeProvider>
+      </PaperProvider>
+    </KeyboardProvider>
   );
 }
 

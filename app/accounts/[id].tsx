@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
   Dialog,
@@ -107,7 +108,10 @@ export default function AccountFormScreen() {
         options={{ title: isNew ? 'New Account' : 'Edit Account', headerShown: true }}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Preview */}
         <View style={styles.preview}>
           <View style={[styles.previewBadge, { backgroundColor: colorHex }]}>
@@ -276,7 +280,7 @@ export default function AccountFormScreen() {
             Delete Account
           </Button>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <Portal>
         {/* Connected account picker */}
