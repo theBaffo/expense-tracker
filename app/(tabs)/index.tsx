@@ -86,6 +86,11 @@ export default function DashboardScreen() {
     recentTransactions,
   } = useDashboard();
 
+  const totalBalance = accountsWithBalance.reduce(
+    (sum, a) => sum + (a.type === 'credit_card' ? -a.balance : a.balance),
+    0,
+  );
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -98,12 +103,27 @@ export default function DashboardScreen() {
             <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
               {fmtMonth(thisMonth).toUpperCase()}
             </Text>
-            <Text variant="titleMedium" style={styles.cardSubtitle}>
-              Total Spent
-            </Text>
-            <Text variant="displaySmall" style={{ color: theme.colors.error }}>
-              €{totalSpentThisMonth.toFixed(2)}
-            </Text>
+            <View style={styles.summaryRow}>
+              <View style={styles.flex1}>
+                <Text variant="titleMedium" style={styles.cardSubtitle}>
+                  Total Spent
+                </Text>
+                <Text variant="displaySmall" style={{ color: theme.colors.error }}>
+                  €{totalSpentThisMonth.toFixed(2)}
+                </Text>
+              </View>
+              <View style={[styles.flex1, { alignItems: 'flex-end' }]}>
+                <Text variant="titleMedium" style={styles.cardSubtitle}>
+                  Balance
+                </Text>
+                <Text
+                  variant="displaySmall"
+                  style={{ color: totalBalance >= 0 ? '#43A047' : theme.colors.error }}
+                >
+                  €{totalBalance.toFixed(2)}
+                </Text>
+              </View>
+            </View>
           </Card.Content>
         </Card>
 
@@ -299,4 +319,5 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   flex1: { flex: 1 },
+  summaryRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 4 },
 });

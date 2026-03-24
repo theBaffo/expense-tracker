@@ -147,9 +147,9 @@ export function useDashboard() {
     (s) => s.settlementDate >= today && s.settlementDate <= in30Days,
   );
 
-  // ── 6. Recent transactions (last 5) ───────────────────────────────────────
+  // ── 6. Recent transactions (last 3) ───────────────────────────────────────
 
-  const recentTransactions = txs.slice(0, 5);
+  const recentTransactions = txs.slice(0, 3);
 
   return {
     thisMonth,
