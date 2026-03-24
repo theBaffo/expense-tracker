@@ -5,6 +5,7 @@ import {
   Dialog,
   Icon,
   Portal,
+  RadioButton,
   Text,
   TextInput,
   TouchableRipple,
@@ -33,9 +34,11 @@ export default function AccountFormScreen() {
   const [colorHex, setColorHex] = useState<string>(PRESET_COLORS[4]); // Blue default
   const [startingBalance, setStartingBalance] = useState('0');
   const [creditLimit, setCreditLimit] = useState('');
+  const [connectedAccountId, setConnectedAccountId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteBlockedDialogVisible, setDeleteBlockedDialogVisible] = useState(false);
+  const [connectedPickerVisible, setConnectedPickerVisible] = useState(false);
 
   // Pre-fill form in edit mode
   useEffect(() => {
@@ -48,6 +51,7 @@ export default function AccountFormScreen() {
       setColorHex(account.colorHex);
       setStartingBalance(String(account.currentBalance));
       setCreditLimit(account.creditLimit != null ? String(account.creditLimit) : '');
+      setConnectedAccountId(account.connectedAccountId ?? null);
     }
   }, [numId, accounts]);
 
@@ -62,6 +66,7 @@ export default function AccountFormScreen() {
         colorHex,
         currentBalance: parseFloat(startingBalance) || 0,
         creditLimit: type === 'credit_card' && creditLimit ? parseFloat(creditLimit) : null,
+        connectedAccountId: type === 'credit_card' ? connectedAccountId : null,
       };
       if (isNew) {
         await addAccount(values);
@@ -230,6 +235,23 @@ export default function AccountFormScreen() {
           />
         )}
 
+        {/* Connected account (credit card only) */}
+        {type === 'credit_card' && (
+          <TouchableRipple onPress={() => setConnectedPickerVisible(true)}>
+            <View pointerEvents="none">
+              <TextInput
+                label="Connected Account"
+                value={accounts.find((a) => a.id === connectedAccountId)?.name ?? ''}
+                mode="outlined"
+                editable={false}
+                style={styles.input}
+                right={<TextInput.Icon icon="chevron-down" />}
+                placeholder="Select account to pay from"
+              />
+            </View>
+          </TouchableRipple>
+        )}
+
         {/* Save */}
         <Button
           mode="contained"
@@ -255,6 +277,48 @@ export default function AccountFormScreen() {
       </ScrollView>
 
       <Portal>
+        {/* Connected account picker */}
+        <Dialog visible={connectedPickerVisible} onDismiss={() => setConnectedPickerVisible(false)}>
+          <Dialog.Title>Connected Account</Dialog.Title>
+          <Dialog.ScrollArea style={styles.dialogScrollArea}>
+            <ScrollView>
+              <RadioButton.Group
+                value={connectedAccountId !== null ? String(connectedAccountId) : ''}
+                onValueChange={(v) => {
+                  setConnectedAccountId(parseInt(v, 10));
+                  setConnectedPickerVisible(false);
+                }}
+              >
+                {accounts
+                  .filter((a) => a.type === 'current' || a.type === 'savings')
+                  .map((account) => {
+                    const meta = ACCOUNT_TYPE_META.find((m) => m.value === account.type);
+                    return (
+                      <TouchableRipple
+                        key={account.id}
+                        onPress={() => {
+                          setConnectedAccountId(account.id);
+                          setConnectedPickerVisible(false);
+                        }}
+                      >
+                        <View style={styles.pickerRow}>
+                          <View style={[styles.pickerBadge, { backgroundColor: account.colorHex }]}>
+                            <Icon source={meta?.icon ?? 'bank'} size={14} color="white" />
+                          </View>
+                          <Text style={styles.flex1}>{account.name}</Text>
+                          <RadioButton value={String(account.id)} />
+                        </View>
+                      </TouchableRipple>
+                    );
+                  })}
+              </RadioButton.Group>
+            </ScrollView>
+          </Dialog.ScrollArea>
+          <Dialog.Actions>
+            <Button onPress={() => setConnectedPickerVisible(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+
         <Dialog visible={deleteDialogVisible} onDismiss={() => setDeleteDialogVisible(false)}>
           <Dialog.Title>Delete Account</Dialog.Title>
           <Dialog.Content>
@@ -353,4 +417,20 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginBottom: 8,
   },
+  dialogScrollArea: { maxHeight: 320 },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    gap: 12,
+  },
+  pickerBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  flex1: { flex: 1 },
 });

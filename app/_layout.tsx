@@ -44,7 +44,7 @@ export default function RootLayout() {
   if (!success || !fontsLoaded) {
     return (
       <View style={styles.centered}>
-        <Text>Loading…</Text>
+        <Text style={{ color: 'white' }}>Loading…</Text>
       </View>
     );
   }
