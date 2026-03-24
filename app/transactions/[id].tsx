@@ -18,7 +18,8 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAccounts } from '@/hooks/useAccounts';
 import { useCategories } from '@/hooks/useCategories';
-import { todayISO, isValidDate } from '@/utils/date';
+import { todayISO } from '@/utils/date';
+import { DatePickerField } from '@/components/DatePickerField';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -77,7 +78,7 @@ export default function TransactionFormScreen() {
     amount.length > 0 &&
     parseFloat(amount) > 0 &&
     accountId !== null &&
-    isValidDate(date);
+    date !== '';
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   async function handleSave() {
@@ -189,17 +190,7 @@ export default function TransactionFormScreen() {
         </Pressable>
 
         {/* Date */}
-        <TextInput
-          label="Date *"
-          value={date}
-          onChangeText={setDate}
-          mode="outlined"
-          style={styles.input}
-          placeholder="YYYY-MM-DD"
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-          error={date.length === 10 && !isValidDate(date)}
-        />
+        <DatePickerField label="Date *" value={date} onChange={setDate} style={styles.input} />
 
         {/* Notes */}
         <TextInput

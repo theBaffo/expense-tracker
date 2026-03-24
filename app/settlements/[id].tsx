@@ -19,7 +19,7 @@ import { useSettlements } from '@/hooks/useSettlements';
 import { useDashboard } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { fmtAmount } from '@/utils/currency';
-import { isValidDate } from '@/utils/date';
+import { DatePickerField } from '@/components/DatePickerField';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -68,7 +68,7 @@ export default function EditSettlementScreen() {
     fromAccountId !== null &&
     amount.length > 0 &&
     parseFloat(amount) > 0 &&
-    isValidDate(date);
+    date !== '';
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   function selectCreditCard(accountId: number) {
@@ -181,16 +181,11 @@ export default function EditSettlementScreen() {
         </Pressable>
 
         {/* Settlement date */}
-        <TextInput
+        <DatePickerField
           label="Settlement Date *"
           value={date}
-          onChangeText={setDate}
-          mode="outlined"
+          onChange={setDate}
           style={styles.input}
-          placeholder="YYYY-MM-DD"
-          keyboardType="numbers-and-punctuation"
-          maxLength={10}
-          error={date.length === 10 && !isValidDate(date)}
         />
 
         {/* Notes */}
