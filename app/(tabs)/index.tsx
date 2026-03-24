@@ -1,11 +1,77 @@
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Card, Divider, Icon, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { PieChart } from 'react-native-gifted-charts';
 
-import { useDashboard } from '@/hooks/useDashboard';
+import { useDashboard, type DashboardCategoryRow } from '@/hooks/useDashboard';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { fmtAmount } from '@/utils/currency';
 import { fmtShortDate, fmtMonth } from '@/utils/date';
+
+// ─── Donut chart ──────────────────────────────────────────────────────────────
+
+function SpendingDonut({ data, total }: { data: DashboardCategoryRow[]; total: number }) {
+  const theme = useTheme();
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
+  const focused = focusedIndex !== null ? data[focusedIndex] : null;
+
+  const pieData = data.map((item, index) => ({
+    value: item.total,
+    color: item.categoryColorHex ?? theme.colors.surfaceVariant,
+    focused: index === focusedIndex,
+  }));
+
+  return (
+    <View style={donutStyles.container}>
+      <PieChart
+        data={pieData}
+        donut
+        radius={90}
+        innerRadius={58}
+        innerCircleColor={theme.colors.elevation.level1}
+        focusOnPress
+        toggleFocusOnPress
+        onPress={(_: unknown, index: number) =>
+          setFocusedIndex((prev) => (prev === index ? null : index))
+        }
+        centerLabelComponent={() => (
+          <View style={donutStyles.center}>
+            {focused ? (
+              <>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}
+                  numberOfLines={2}
+                >
+                  {focused.categoryName ?? 'Uncategorized'}
+                </Text>
+                <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: 2 }}>
+                  €{focused.total.toFixed(0)}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  Total
+                </Text>
+                <Text variant="titleMedium" style={{ color: theme.colors.error, marginTop: 2 }}>
+                  €{total.toFixed(0)}
+                </Text>
+              </>
+            )}
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+const donutStyles = StyleSheet.create({
+  container: { alignItems: 'center', paddingVertical: 8 },
+  center: { alignItems: 'center', justifyContent: 'center', width: 100 },
+});
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -38,6 +104,48 @@ export default function DashboardScreen() {
             <Text variant="displaySmall" style={{ color: theme.colors.error }}>
               €{totalSpentThisMonth.toFixed(2)}
             </Text>
+          </Card.Content>
+        </Card>
+
+        {/* ── Spending by Category ───────────────────────────────────────── */}
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text variant="titleMedium" style={styles.cardTitle}>
+              Spending by Category
+            </Text>
+            {categorySpending.length === 0 ? (
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                No spending this month.
+              </Text>
+            ) : (
+              <>
+                <SpendingDonut data={categorySpending} total={totalSpentThisMonth} />
+                <View style={styles.divider} />
+                {categorySpending.map((item, index) => (
+                  <View key={item.categoryId ?? 'uncategorized'}>
+                    {index > 0 && <Divider style={styles.divider} />}
+                    <View style={styles.row}>
+                      <View
+                        style={[
+                          styles.badge,
+                          {
+                            backgroundColor: item.categoryColorHex ?? theme.colors.surfaceVariant,
+                          },
+                        ]}
+                      >
+                        <Icon source={item.categoryIcon ?? 'tag-outline'} size={16} color="white" />
+                      </View>
+                      <Text variant="bodyMedium" style={styles.flex1}>
+                        {item.categoryName ?? 'Uncategorized'}
+                      </Text>
+                      <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+                        €{item.total.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
           </Card.Content>
         </Card>
 
@@ -83,44 +191,6 @@ export default function DashboardScreen() {
                   </View>
                 );
               })
-            )}
-          </Card.Content>
-        </Card>
-
-        {/* ── Spending by Category ───────────────────────────────────────── */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text variant="titleMedium" style={styles.cardTitle}>
-              Spending by Category
-            </Text>
-            {categorySpending.length === 0 ? (
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                No spending this month.
-              </Text>
-            ) : (
-              categorySpending.map((item, index) => (
-                <View key={item.categoryId ?? 'uncategorized'}>
-                  {index > 0 && <Divider style={styles.divider} />}
-                  <View style={styles.row}>
-                    <View
-                      style={[
-                        styles.badge,
-                        {
-                          backgroundColor: item.categoryColorHex ?? theme.colors.surfaceVariant,
-                        },
-                      ]}
-                    >
-                      <Icon source={item.categoryIcon ?? 'tag-outline'} size={16} color="white" />
-                    </View>
-                    <Text variant="bodyMedium" style={styles.flex1}>
-                      {item.categoryName ?? 'Uncategorized'}
-                    </Text>
-                    <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-                      €{item.total.toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-              ))
             )}
           </Card.Content>
         </Card>
