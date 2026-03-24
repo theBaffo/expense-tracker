@@ -28,6 +28,8 @@ export default function SettingsScreen() {
       setConfirmVisible(false);
     }
 
+    // Restart the JS bundle from scratch
+    // This clears all React states and re-runs all queries
     DevSettings.reload();
   }
 

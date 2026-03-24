@@ -8,6 +8,13 @@
       "when": 1773824806502,
       "tag": "0000_public_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1774365360813,
+      "tag": "0001_unique_kid_colt",
+      "breakpoints": true
     }
   ]
 }

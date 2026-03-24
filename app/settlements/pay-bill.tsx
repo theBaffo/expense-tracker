@@ -54,13 +54,17 @@ export default function PayBillScreen() {
     if (balance > 0) setAmount(balance.toFixed(2));
   }, [toAccountId, accountsWithBalance, amount]);
 
-  // Pre-select default "from" account: prefer 'current', then first available
+  // Pre-select "from" account: use credit card's connectedAccountId, else prefer 'current'
   useEffect(() => {
-    if (fromAccountId === null && sourceAccounts.length > 0) {
+    if (sourceAccounts.length === 0) return;
+    const card = accounts.find((a) => a.id === toAccountId);
+    if (card?.connectedAccountId != null) {
+      setFromAccountId(card.connectedAccountId);
+    } else if (fromAccountId === null) {
       const defaultFrom = sourceAccounts.find((a) => a.type === 'current') ?? sourceAccounts[0];
       setFromAccountId(defaultFrom.id);
     }
-  }, [sourceAccounts, fromAccountId]);
+  }, [toAccountId, accounts, sourceAccounts, fromAccountId]);
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const selectedCreditCard = accounts.find((a) => a.id === toAccountId);
@@ -78,6 +82,7 @@ export default function PayBillScreen() {
   function selectCreditCard(id: number) {
     setToAccountId(id);
     setAmount(''); // clear so the auto-fill effect re-runs for the new card
+    setFromAccountId(null); // clear so the connected account effect re-runs for the new card
     setToPickerVisible(false);
   }
 

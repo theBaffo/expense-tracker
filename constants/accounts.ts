@@ -20,4 +20,11 @@ export const DEFAULT_ACCOUNTS = [
     colorHex: '#1E88E5',
     currentBalance: 0,
   },
+  {
+    name: 'Credit Card',
+    type: 'credit_card' as const,
+    currency: 'EUR',
+    colorHex: '#E53935',
+    currentBalance: 0,
+  },
 ];

@@ -1,0 +1,1 @@
+ALTER TABLE `accounts` ADD `connected_account_id` integer;

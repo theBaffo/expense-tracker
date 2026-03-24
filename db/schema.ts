@@ -12,6 +12,7 @@ export const accounts = sqliteTable('accounts', {
   currency: text('currency').notNull().default('EUR'),
   creditLimit: real('credit_limit'), // null for non-credit accounts
   currentBalance: real('current_balance').notNull().default(0),
+  connectedAccountId: integer('connected_account_id'), // for credit cards: the current/savings account used to pay the bill
   colorHex: text('color_hex').notNull().default('#6750A4'),
   createdAt: text('created_at')
     .notNull()
