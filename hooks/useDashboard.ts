@@ -107,27 +107,34 @@ export function useDashboard(month?: string) {
   }
   const categorySpending = Array.from(catMap.values()).sort((a, b) => b.total - a.total);
 
-  // ── 4. Account balances ────────────────────────────────────────────────────
+  // ── 4. Account balances as of end of viewMonth ────────────────────────────
   //
   // Transactions use sign convention: negative = expense, positive = income.
   //
   // current / savings / cash:
   //   balance = starting_balance + Σ(transactions) − Σ(outgoing settlements)
-  //   (adding txSum because income is positive and expenses are negative)
   //
   // credit_card:
   //   amount_owed = −Σ(transactions) − Σ(incoming settlements)
-  //   (flipping sign so that expenses become a positive "owed" figure;
+  //   (flipping sign so expenses become a positive "owed" figure;
   //    incoming settlements reduce what is owed)
+  //
+  // Both sums are capped at the end of viewMonth so that navigating to a past
+  // month shows the balance as it was then, not the current balance.
+
+  const [vmYear, vmMon] = viewMonth.split('-').map(Number);
+  const cutoff = dateToISO(new Date(vmYear, vmMon, 1)); // first day of next month
 
   const txSumByAccount = new Map<number, number>();
   for (const tx of txs) {
+    if (tx.transactionDate >= cutoff) continue;
     txSumByAccount.set(tx.accountId, (txSumByAccount.get(tx.accountId) ?? 0) + tx.amount);
   }
 
   const outgoingByAccount = new Map<number, number>();
   const incomingByAccount = new Map<number, number>();
   for (const stl of stls) {
+    if (stl.settlementDate >= cutoff) continue;
     outgoingByAccount.set(
       stl.fromAccountId,
       (outgoingByAccount.get(stl.fromAccountId) ?? 0) + stl.amount,
