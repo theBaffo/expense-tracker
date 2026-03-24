@@ -1,5 +1,5 @@
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return dateToISO(new Date());
 }
 
 export function isValidDate(value: string): boolean {
@@ -21,8 +21,7 @@ export function fmtMonth(ym: string): string {
 /** Returns "YYYY-MM-15" for the month following the current one. */
 export function defaultSettlementDate(): string {
   const now = new Date();
-  const next15 = new Date(now.getFullYear(), now.getMonth() + 1, 15);
-  return next15.toISOString().slice(0, 10);
+  return dateToISO(new Date(now.getFullYear(), now.getMonth() + 1, 15));
 }
 
 export function formatSectionDate(iso: string): string {
