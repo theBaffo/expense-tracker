@@ -4,12 +4,13 @@ import { desc, eq } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { accounts, categories, transactions, settlements } from '@/db/schema';
+import { dateToISO } from '@/utils/date';
 
 // Stable aliases for the two accounts joins on settlements
 const fromAcc = alias(accounts, 'from_acc');
 const toAcc = alias(accounts, 'to_acc');
 
-export function useDashboard() {
+export function useDashboard(month?: string) {
   // ── Raw data queries ───────────────────────────────────────────────────────
 
   const { data: allAccounts } = useLiveQuery(db.select().from(accounts));
@@ -54,17 +55,24 @@ export function useDashboard() {
 
   // ── Date constants ─────────────────────────────────────────────────────────
 
-  const today = new Date().toISOString().slice(0, 10);
-  const thisMonth = today.slice(0, 7); // 'YYYY-MM'
-  const in30Days = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
+  const today = dateToISO(new Date());
+  const currentMonth = today.slice(0, 7); // 'YYYY-MM'
+  const viewMonth = month ?? currentMonth;
+  const in30Days = dateToISO(new Date(Date.now() + 30 * 86_400_000));
 
   const txs = allTransactions ?? [];
   const accts = allAccounts ?? [];
   const stls = allSettlements ?? [];
 
-  // ── 1. This-month transactions ─────────────────────────────────────────────
+  // ── 1. Available months (all months with transactions + current) ───────────
 
-  const thisMonthTxs = txs.filter((tx) => tx.transactionDate.startsWith(thisMonth));
+  const monthSet = new Set<string>([currentMonth]);
+  for (const tx of txs) monthSet.add(tx.transactionDate.slice(0, 7));
+  const availableMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+
+  // ── 2. This-month transactions ─────────────────────────────────────────────
+
+  const thisMonthTxs = txs.filter((tx) => tx.transactionDate.startsWith(viewMonth));
 
   // ── 2. Total spent this month (absolute sum of negative amounts) ───────────
 
@@ -147,12 +155,13 @@ export function useDashboard() {
     (s) => s.settlementDate >= today && s.settlementDate <= in30Days,
   );
 
-  // ── 6. Recent transactions (last 3) ───────────────────────────────────────
+  // ── 6. Recent transactions for the viewed month (last 3) ──────────────────
 
-  const recentTransactions = txs.slice(0, 3);
+  const recentTransactions = thisMonthTxs.slice(0, 3);
 
   return {
-    thisMonth,
+    viewMonth,
+    availableMonths,
     totalSpentThisMonth,
     categorySpending,
     accountsWithBalance,

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Card, Divider, Icon, Text, useTheme } from 'react-native-paper';
+import { useRef, useState } from 'react';
+import { PanResponder, ScrollView, StyleSheet, View } from 'react-native';
+import { Card, Divider, Icon, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-gifted-charts';
 
@@ -76,14 +76,42 @@ const donutStyles = StyleSheet.create({
 
 export default function DashboardScreen() {
   const theme = useTheme();
+
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
+
   const {
-    thisMonth,
+    availableMonths,
     totalSpentThisMonth,
     categorySpending,
     accountsWithBalance,
     upcomingSettlements,
     recentTransactions,
-  } = useDashboard();
+  } = useDashboard(selectedMonth);
+
+  const idx = availableMonths.indexOf(selectedMonth);
+  // availableMonths is sorted descending: higher index = older month
+  const hasPrev = idx < availableMonths.length - 1;
+  const hasNext = idx > 0;
+
+  const navRef = useRef({ goPrev: () => {}, goNext: () => {} });
+
+  navRef.current.goPrev = () => {
+    if (hasPrev) setSelectedMonth(availableMonths[idx + 1]);
+  };
+  navRef.current.goNext = () => {
+    if (hasNext) setSelectedMonth(availableMonths[idx - 1]);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, { dx, dy }) =>
+        Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 20,
+      onPanResponderRelease: (_, { dx }) => {
+        if (dx < -60) navRef.current.goNext();
+        else if (dx > 60) navRef.current.goPrev();
+      },
+    }),
+  ).current;
 
   const totalBalance = accountsWithBalance.reduce(
     (sum, a) => sum + (a.type === 'credit_card' ? -a.balance : a.balance),
@@ -94,14 +122,41 @@ export default function DashboardScreen() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
+      {...panResponder.panHandlers}
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* ── This Month ─────────────────────────────────────────────────── */}
         <Card style={styles.card}>
           <Card.Content>
-            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {fmtMonth(thisMonth).toUpperCase()}
-            </Text>
+            <View style={styles.monthNav}>
+              <TouchableRipple
+                onPress={navRef.current.goPrev}
+                disabled={!hasPrev}
+                borderless
+                style={styles.monthNavBtn}
+              >
+                <Icon
+                  source="chevron-left"
+                  size={20}
+                  color={hasPrev ? theme.colors.onSurface : 'transparent'}
+                />
+              </TouchableRipple>
+              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                {fmtMonth(selectedMonth).toUpperCase()}
+              </Text>
+              <TouchableRipple
+                onPress={navRef.current.goNext}
+                disabled={!hasNext}
+                borderless
+                style={styles.monthNavBtn}
+              >
+                <Icon
+                  source="chevron-right"
+                  size={20}
+                  color={hasNext ? theme.colors.onSurface : 'transparent'}
+                />
+              </TouchableRipple>
+            </View>
             <View style={styles.summaryRow}>
               <View style={styles.flex1}>
                 <Text variant="titleMedium" style={styles.cardSubtitle}>
@@ -273,4 +328,14 @@ const styles = StyleSheet.create({
   },
   flex1: { flex: 1 },
   summaryRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 4 },
+  monthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  monthNavBtn: {
+    padding: 4,
+    borderRadius: 12,
+  },
 });
