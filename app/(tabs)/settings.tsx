@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { DevSettings, ScrollView, StyleSheet } from 'react-native';
 import { Button, Dialog, Divider, List, Portal, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -28,7 +28,7 @@ export default function SettingsScreen() {
       setConfirmVisible(false);
     }
 
-    router.replace('/');
+    DevSettings.reload();
   }
 
   return (
@@ -74,7 +74,7 @@ export default function SettingsScreen() {
           <Dialog.Content>
             <Text>
               This will permanently delete all transactions, settlements, and accounts, then restore
-              the default accounts and categories. This cannot be undone.
+              the default accounts and categories. The application will be restarted.
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
