@@ -41,10 +41,6 @@ export default function TransactionsScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
     >
-      <Text variant="headlineMedium" style={styles.heading}>
-        Transactions
-      </Text>
-
       {transactions.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>

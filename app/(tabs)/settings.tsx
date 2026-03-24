@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { Divider, List, Text, useTheme } from 'react-native-paper';
+import { Divider, List, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
@@ -12,10 +12,6 @@ export default function SettingsScreen() {
       edges={['bottom']}
     >
       <ScrollView>
-        <Text variant="headlineMedium" style={styles.heading}>
-          Settings
-        </Text>
-
         <List.Section>
           <List.Subheader>General</List.Subheader>
           <List.Item

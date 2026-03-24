@@ -26,10 +26,6 @@ export default function DashboardScreen() {
       edges={['bottom']}
     >
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text variant="headlineMedium" style={styles.heading}>
-          Dashboard
-        </Text>
-
         {/* ── This Month ─────────────────────────────────────────────────── */}
         <Card style={styles.card}>
           <Card.Content>

@@ -15,10 +15,6 @@ export default function AccountsScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
     >
-      <Text variant="headlineMedium" style={styles.heading}>
-        Accounts
-      </Text>
-
       {accounts.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>

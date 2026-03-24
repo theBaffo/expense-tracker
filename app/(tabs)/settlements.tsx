@@ -35,10 +35,6 @@ export default function SettlementsScreen() {
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
     >
-      <Text variant="headlineMedium" style={styles.heading}>
-        Settlements
-      </Text>
-
       {settlements.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
