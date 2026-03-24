@@ -10,29 +10,11 @@ import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { MD3LightTheme, MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { en, registerTranslation } from 'react-native-paper-dates';
 import { db } from '@/db';
-import { accounts, categories } from '@/db/schema';
 import migrations from '@/db/migrations/migrations';
-import { DEFAULT_CATEGORIES } from '@/constants/categories';
-import { DEFAULT_ACCOUNTS } from '@/constants/accounts';
+import { seedDefaults } from '@/db/seed';
 
 // TODO: use registerAllTranslations when app will be fully localized
 registerTranslation('en', en);
-
-async function seedDefaults() {
-  const [existingCategories, existingAccounts] = await Promise.all([
-    db.select({ id: categories.id }).from(categories).limit(1),
-    db.select({ id: accounts.id }).from(accounts).limit(1),
-  ]);
-
-  await Promise.all([
-    existingCategories.length === 0
-      ? db.insert(categories).values(DEFAULT_CATEGORIES)
-      : Promise.resolve(),
-    existingAccounts.length === 0
-      ? db.insert(accounts).values(DEFAULT_ACCOUNTS)
-      : Promise.resolve(),
-  ]);
-}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
