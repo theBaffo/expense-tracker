@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { PieChart } from 'react-native-gifted-charts';
 
 import { useDashboard, type DashboardCategoryRow } from '@/hooks/useDashboard';
-import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { fmtAmount } from '@/utils/currency';
 import { fmtShortDate, fmtMonth } from '@/utils/date';
 
@@ -165,52 +164,6 @@ export default function DashboardScreen() {
                   </View>
                 ))}
               </>
-            )}
-          </Card.Content>
-        </Card>
-
-        {/* ── Accounts ───────────────────────────────────────────────────── */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text variant="titleMedium" style={styles.cardTitle}>
-              Accounts
-            </Text>
-            {accountsWithBalance.length === 0 ? (
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                No accounts yet.
-              </Text>
-            ) : (
-              accountsWithBalance.map((account, index) => {
-                const meta = ACCOUNT_TYPE_META.find((m) => m.value === account.type);
-                const isCreditCard = account.type === 'credit_card';
-                const balanceColor = isCreditCard
-                  ? account.balance > 0
-                    ? theme.colors.error
-                    : theme.colors.onSurface
-                  : account.balance >= 0
-                    ? '#43A047'
-                    : theme.colors.error;
-
-                return (
-                  <View key={account.id}>
-                    {index > 0 && <Divider style={styles.divider} />}
-                    <View style={styles.row}>
-                      <View style={[styles.badge, { backgroundColor: account.colorHex }]}>
-                        <Icon source={meta?.icon ?? 'bank'} size={16} color="white" />
-                      </View>
-                      <View style={styles.flex1}>
-                        <Text variant="bodyMedium">{account.name}</Text>
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                          {isCreditCard ? 'Amount owed' : meta?.label}
-                        </Text>
-                      </View>
-                      <Text variant="bodyMedium" style={{ color: balanceColor }}>
-                        {fmtAmount(account.balance, account.currency)}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })
             )}
           </Card.Content>
         </Card>
