@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
@@ -36,6 +36,9 @@ export default function AccountFormScreen() {
   const [startingBalance, setStartingBalance] = useState('0');
   const [creditLimit, setCreditLimit] = useState('');
   const [connectedAccountId, setConnectedAccountId] = useState<number | null>(null);
+  const currencyRef = useRef<RNTextInput>(null);
+  const numericRef = useRef<RNTextInput>(null);
+
   const [saving, setSaving] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteBlockedDialogVisible, setDeleteBlockedDialogVisible] = useState(false);
@@ -133,6 +136,8 @@ export default function AccountFormScreen() {
           mode="outlined"
           style={styles.input}
           autoCapitalize="words"
+          returnKeyType="next"
+          onSubmitEditing={() => currencyRef.current?.focus()}
         />
 
         {/* Account type */}
@@ -181,6 +186,7 @@ export default function AccountFormScreen() {
 
         {/* Currency */}
         <TextInput
+          ref={currencyRef}
           label="Currency"
           value={currency}
           onChangeText={setCurrency}
@@ -188,6 +194,8 @@ export default function AccountFormScreen() {
           style={styles.input}
           autoCapitalize="characters"
           maxLength={3}
+          returnKeyType="next"
+          onSubmitEditing={() => numericRef.current?.focus()}
         />
 
         {/* Color picker */}
@@ -219,18 +227,21 @@ export default function AccountFormScreen() {
         {/* Starting balance (not applicable for credit cards) */}
         {type !== 'credit_card' && (
           <TextInput
+            ref={numericRef}
             label="Starting Balance"
             value={startingBalance}
             onChangeText={setStartingBalance}
             mode="outlined"
             style={styles.input}
             keyboardType="numeric"
+            returnKeyType="done"
           />
         )}
 
         {/* Credit limit (credit card only) */}
         {type === 'credit_card' && (
           <TextInput
+            ref={numericRef}
             label="Credit Limit"
             value={creditLimit}
             onChangeText={setCreditLimit}
@@ -238,6 +249,7 @@ export default function AccountFormScreen() {
             style={styles.input}
             keyboardType="numeric"
             placeholder="Optional"
+            returnKeyType="done"
           />
         )}
 

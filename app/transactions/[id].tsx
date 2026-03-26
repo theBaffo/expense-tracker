@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
@@ -43,6 +43,9 @@ export default function TransactionFormScreen() {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [date, setDate] = useState(todayISO);
   const [notes, setNotes] = useState('');
+
+  const descriptionRef = useRef<RNTextInput>(null);
+  const notesRef = useRef<RNTextInput>(null);
 
   const [saving, setSaving] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -141,31 +144,6 @@ export default function TransactionFormScreen() {
           style={styles.segmented}
         />
 
-        {/* Amount */}
-        <TextInput
-          label="Amount *"
-          value={amount}
-          onChangeText={setAmount}
-          mode="outlined"
-          keyboardType="decimal-pad"
-          style={styles.input}
-          left={
-            <TextInput.Affix
-              text={selectedAccount?.currency ? `${selectedAccount.currency} ` : ''}
-            />
-          }
-        />
-
-        {/* Description */}
-        <TextInput
-          label="Description *"
-          value={description}
-          onChangeText={setDescription}
-          mode="outlined"
-          style={styles.input}
-          autoCapitalize="sentences"
-        />
-
         {/* Account picker */}
         <Pressable onPress={() => setAccountPickerVisible(true)}>
           <View pointerEvents="none">
@@ -199,16 +177,46 @@ export default function TransactionFormScreen() {
         {/* Date */}
         <DatePickerField label="Date *" value={date} onChange={setDate} style={styles.input} />
 
+        {/* Amount */}
+        <TextInput
+          label="Amount *"
+          value={amount}
+          onChangeText={setAmount}
+          mode="outlined"
+          keyboardType="decimal-pad"
+          style={styles.input}
+          returnKeyType="next"
+          onSubmitEditing={() => descriptionRef.current?.focus()}
+          left={
+            <TextInput.Affix
+              text={selectedAccount?.currency ? `${selectedAccount.currency} ` : ''}
+            />
+          }
+        />
+
+        {/* Description */}
+        <TextInput
+          ref={descriptionRef}
+          label="Description *"
+          value={description}
+          onChangeText={setDescription}
+          mode="outlined"
+          style={styles.input}
+          autoCapitalize="sentences"
+          returnKeyType="next"
+          onSubmitEditing={() => notesRef.current?.focus()}
+        />
+
         {/* Notes */}
         <TextInput
+          ref={notesRef}
           label="Notes"
           value={notes}
           onChangeText={setNotes}
           mode="outlined"
           style={styles.input}
-          multiline
-          numberOfLines={3}
           autoCapitalize="sentences"
+          returnKeyType="done"
         />
 
         {/* Save */}

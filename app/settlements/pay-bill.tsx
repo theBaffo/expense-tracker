@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
@@ -44,6 +44,8 @@ export default function PayBillScreen() {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(defaultSettlementDate);
   const [notes, setNotes] = useState('');
+  const notesRef = useRef<RNTextInput>(null);
+
   const [saving, setSaving] = useState(false);
   const [toPickerVisible, setToPickerVisible] = useState(false);
   const [fromPickerVisible, setFromPickerVisible] = useState(false);
@@ -158,21 +160,6 @@ export default function PayBillScreen() {
           </View>
         </Pressable>
 
-        {/* Amount */}
-        <TextInput
-          label="Amount *"
-          value={amount}
-          onChangeText={setAmount}
-          mode="outlined"
-          keyboardType="decimal-pad"
-          style={styles.input}
-          left={
-            <TextInput.Affix
-              text={selectedFromAccount?.currency ? `${selectedFromAccount.currency} ` : ''}
-            />
-          }
-        />
-
         {/* From account picker */}
         <Pressable onPress={() => setFromPickerVisible(true)}>
           <View pointerEvents="none">
@@ -196,16 +183,33 @@ export default function PayBillScreen() {
           style={styles.input}
         />
 
+        {/* Amount */}
+        <TextInput
+          label="Amount *"
+          value={amount}
+          onChangeText={setAmount}
+          mode="outlined"
+          keyboardType="decimal-pad"
+          style={styles.input}
+          returnKeyType="next"
+          onSubmitEditing={() => notesRef.current?.focus()}
+          left={
+            <TextInput.Affix
+              text={selectedFromAccount?.currency ? `${selectedFromAccount.currency} ` : ''}
+            />
+          }
+        />
+
         {/* Notes */}
         <TextInput
+          ref={notesRef}
           label="Notes"
           value={notes}
           onChangeText={setNotes}
           mode="outlined"
           style={styles.input}
-          multiline
-          numberOfLines={3}
           autoCapitalize="sentences"
+          returnKeyType="done"
         />
 
         {/* Save */}

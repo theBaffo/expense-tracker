@@ -114,6 +114,7 @@ export default function CategoryFormScreen() {
           mode="outlined"
           style={styles.nameInput}
           autoCapitalize="words"
+          returnKeyType="done"
         />
 
         {/* Color picker */}
