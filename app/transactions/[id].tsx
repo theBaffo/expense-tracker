@@ -30,7 +30,8 @@ export default function TransactionFormScreen() {
   const isNew = id === 'new';
   const numId = isNew ? null : parseInt(id, 10);
 
-  const { transactions, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { transactions, latestTransaction, addTransaction, updateTransaction, deleteTransaction } =
+    useTransactions();
   const { accounts } = useAccounts();
   const { categories } = useCategories();
 
@@ -48,17 +49,19 @@ export default function TransactionFormScreen() {
   const [accountPickerVisible, setAccountPickerVisible] = useState(false);
   const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
 
-  // Pre-select first account when creating a new transaction
+  // Pre-select account of the latest inserted transaction when creating a new one
   useEffect(() => {
     if (isNew && accountId === null && accounts.length > 0) {
-      setAccountId(accounts[0].id);
+      setAccountId(latestTransaction?.accountId ?? accounts[0].id);
     }
-  }, [isNew, accounts, accountId]);
+  }, [isNew, accounts, accountId, latestTransaction]);
 
   // Pre-fill form in edit mode
   useEffect(() => {
     if (numId == null) return;
+
     const tx = transactions.find((t) => t.id === numId);
+
     if (tx) {
       setIsExpense(tx.amount < 0);
       setAmount(String(Math.abs(tx.amount)));

@@ -5,6 +5,13 @@ import { db } from '@/db';
 import { accounts, categories, transactions } from '@/db/schema';
 import type { NewTransaction } from '@/db/schema';
 
+function findLatestTransaction<T extends { createdAt: string }>(rows: T[]): T | null {
+  return rows.reduce<T | null>(
+    (prev, tx) => (!prev || tx.createdAt > prev.createdAt ? tx : prev),
+    null,
+  );
+}
+
 export function useTransactions() {
   const { data } = useLiveQuery(
     db
@@ -44,8 +51,11 @@ export function useTransactions() {
     await db.delete(transactions).where(eq(transactions.id, id));
   }
 
+  const allTransactions = data ?? [];
+
   return {
-    transactions: data ?? [],
+    transactions: allTransactions,
+    latestTransaction: findLatestTransaction(allTransactions),
     addTransaction,
     updateTransaction,
     deleteTransaction,
