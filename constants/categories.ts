@@ -1,14 +1,24 @@
 export const PRESET_COLORS = [
   '#E53935', // Red
+  '#EF5350', // Light Red
   '#FB8C00', // Orange
+  '#FF7043', // Deep Orange
   '#FDD835', // Yellow
+  '#FFCA28', // Amber
   '#43A047', // Green
-  '#1E88E5', // Blue
-  '#5E35B1', // Deep Purple
-  '#D81B60', // Pink
+  '#66BB6A', // Light Green
   '#00ACC1', // Cyan
+  '#26C6DA', // Light Cyan
+  '#1E88E5', // Blue
+  '#42A5F5', // Light Blue
+  '#5E35B1', // Deep Purple
+  '#7E57C2', // Medium Purple
+  '#D81B60', // Pink
+  '#EC407A', // Light Pink
   '#6D4C41', // Brown
+  '#8D6E63', // Light Brown
   '#546E7A', // Blue Grey
+  '#78909C', // Light Blue Grey
 ] as const;
 
 export const PRESET_ICONS = [
