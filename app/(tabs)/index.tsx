@@ -138,7 +138,7 @@ export default function DashboardScreen() {
                 <Icon
                   source="chevron-left"
                   size={20}
-                  color={hasPrev ? theme.colors.onSurface : 'transparent'}
+                  color={hasPrev ? theme.colors.onSurface : theme.colors.background}
                 />
               </TouchableRipple>
               <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -153,7 +153,7 @@ export default function DashboardScreen() {
                 <Icon
                   source="chevron-right"
                   size={20}
-                  color={hasNext ? theme.colors.onSurface : 'transparent'}
+                  color={hasNext ? theme.colors.onSurface : theme.colors.background}
                 />
               </TouchableRipple>
             </View>
