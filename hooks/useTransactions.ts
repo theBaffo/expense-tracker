@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { accounts, categories, transactions } from '@/db/schema';
@@ -12,7 +12,7 @@ function findLatestTransaction<T extends { createdAt: string }>(rows: T[]): T | 
   );
 }
 
-export function useTransactions() {
+export function useTransactions(month?: string) {
   const { data } = useLiveQuery(
     db
       .select({
@@ -33,7 +33,13 @@ export function useTransactions() {
       .from(transactions)
       .leftJoin(accounts, eq(transactions.accountId, accounts.id))
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .orderBy(desc(transactions.transactionDate), desc(transactions.amount)),
+      .orderBy(
+        desc(transactions.transactionDate),
+        // Income first, then expenses
+        sql`CASE WHEN ${transactions.amount} > 0 THEN 0 ELSE 1 END`,
+        // Amount desc (abs for expenses)
+        desc(sql`abs(${transactions.amount})`),
+      ),
   );
 
   async function addTransaction(values: Omit<NewTransaction, 'id' | 'createdAt'>) {
@@ -53,8 +59,16 @@ export function useTransactions() {
 
   const allTransactions = data ?? [];
 
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const viewMonth = month ?? currentMonth;
+
+  const monthSet = new Set<string>([currentMonth]);
+  for (const tx of allTransactions) monthSet.add(tx.transactionDate.slice(0, 7));
+  const availableMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+
   return {
-    transactions: allTransactions,
+    transactions: allTransactions.filter((tx) => tx.transactionDate.startsWith(viewMonth)),
+    availableMonths,
     latestTransaction: findLatestTransaction(allTransactions),
     addTransaction,
     updateTransaction,

@@ -1,10 +1,11 @@
-import { SectionList, StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { PanResponder, SectionList, StyleSheet, View } from 'react-native';
 import { Divider, FAB, Icon, Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { useTransactions, type TransactionRow } from '@/hooks/useTransactions';
-import { formatSectionDate } from '@/utils/date';
+import { formatSectionDate, fmtMonth } from '@/utils/date';
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
 
@@ -33,14 +34,69 @@ function formatAmount(amount: number, currency: string | null): string {
 
 export default function TransactionsScreen() {
   const theme = useTheme();
-  const { transactions } = useTransactions();
+
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const { transactions, availableMonths } = useTransactions(selectedMonth);
   const sections = groupByDate(transactions);
+
+  const idx = availableMonths.indexOf(selectedMonth);
+  const hasPrev = idx < availableMonths.length - 1;
+  const hasNext = idx > 0;
+
+  const navRef = useRef({ goPrev: () => {}, goNext: () => {} });
+  navRef.current.goPrev = () => {
+    if (hasPrev) setSelectedMonth(availableMonths[idx + 1]);
+  };
+  navRef.current.goNext = () => {
+    if (hasNext) setSelectedMonth(availableMonths[idx - 1]);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, { dx, dy }) =>
+        Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 20,
+      onPanResponderRelease: (_, { dx }) => {
+        if (dx < -60) navRef.current.goNext();
+        else if (dx > 60) navRef.current.goPrev();
+      },
+    }),
+  ).current;
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
       edges={['bottom']}
+      {...panResponder.panHandlers}
     >
+      <View style={styles.monthNav}>
+        <TouchableRipple
+          onPress={navRef.current.goPrev}
+          disabled={!hasPrev}
+          borderless
+          style={styles.monthNavBtn}
+        >
+          <Icon
+            source="chevron-left"
+            size={20}
+            color={hasPrev ? theme.colors.onSurface : theme.colors.background}
+          />
+        </TouchableRipple>
+        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          {fmtMonth(selectedMonth).toUpperCase()}
+        </Text>
+        <TouchableRipple
+          onPress={navRef.current.goNext}
+          disabled={!hasNext}
+          borderless
+          style={styles.monthNavBtn}
+        >
+          <Icon
+            source="chevron-right"
+            size={20}
+            color={hasNext ? theme.colors.onSurface : theme.colors.background}
+          />
+        </TouchableRipple>
+      </View>
       {transactions.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -141,5 +197,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 24,
+  },
+  monthNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  monthNavBtn: {
+    padding: 4,
+    borderRadius: 12,
   },
 });

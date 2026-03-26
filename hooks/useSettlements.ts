@@ -10,7 +10,7 @@ import type { NewSettlement } from '@/db/schema';
 const fromAcc = alias(accounts, 'from_acc');
 const toAcc = alias(accounts, 'to_acc');
 
-export function useSettlements() {
+export function useSettlements(month?: string) {
   const { data } = useLiveQuery(
     db
       .select({
@@ -49,8 +49,18 @@ export function useSettlements() {
     await db.delete(settlements).where(eq(settlements.id, id));
   }
 
+  const allSettlements = data ?? [];
+
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const viewMonth = month ?? currentMonth;
+
+  const monthSet = new Set<string>([currentMonth]);
+  for (const stl of allSettlements) monthSet.add(stl.settlementDate.slice(0, 7));
+  const availableMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+
   return {
-    settlements: data ?? [],
+    settlements: allSettlements.filter((stl) => stl.settlementDate.startsWith(viewMonth)),
+    availableMonths,
     addSettlement,
     updateSettlement,
     deleteSettlement,
