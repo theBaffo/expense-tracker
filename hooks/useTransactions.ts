@@ -26,7 +26,7 @@ export function useTransactions() {
       .from(transactions)
       .leftJoin(accounts, eq(transactions.accountId, accounts.id))
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
-      .orderBy(desc(transactions.transactionDate), desc(transactions.createdAt)),
+      .orderBy(desc(transactions.transactionDate), desc(transactions.amount)),
   );
 
   async function addTransaction(values: Omit<NewTransaction, 'id' | 'createdAt'>) {
