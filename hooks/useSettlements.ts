@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { desc, eq } from 'drizzle-orm';
@@ -49,7 +50,7 @@ export function useSettlements(month?: string) {
     await db.delete(settlements).where(eq(settlements.id, id));
   }
 
-  const allSettlements = data ?? [];
+  const allSettlements = useMemo(() => data ?? [], [data]);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const viewMonth = month ?? currentMonth;
@@ -58,8 +59,14 @@ export function useSettlements(month?: string) {
   for (const stl of allSettlements) monthSet.add(stl.settlementDate.slice(0, 7));
   const availableMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
 
+  const settlementsCurrentMonth = useMemo(
+    () => allSettlements.filter((stl) => stl.settlementDate.startsWith(viewMonth)),
+    [allSettlements, viewMonth],
+  );
+
   return {
-    settlements: allSettlements.filter((stl) => stl.settlementDate.startsWith(viewMonth)),
+    settlementsCurrentMonth,
+    settlements: allSettlements,
     availableMonths,
     addSettlement,
     updateSettlement,

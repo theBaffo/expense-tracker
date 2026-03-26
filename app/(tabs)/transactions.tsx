@@ -36,8 +36,8 @@ export default function TransactionsScreen() {
   const theme = useTheme();
 
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
-  const { transactions, availableMonths } = useTransactions(selectedMonth);
-  const sections = groupByDate(transactions);
+  const { transactionsCurrentMonth, availableMonths } = useTransactions(selectedMonth);
+  const sections = groupByDate(transactionsCurrentMonth);
 
   const idx = availableMonths.indexOf(selectedMonth);
   const hasPrev = idx < availableMonths.length - 1;
@@ -97,7 +97,7 @@ export default function TransactionsScreen() {
           />
         </TouchableRipple>
       </View>
-      {transactions.length === 0 ? (
+      {transactionsCurrentMonth.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             No transactions yet.

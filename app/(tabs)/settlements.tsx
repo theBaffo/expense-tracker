@@ -30,8 +30,8 @@ export default function SettlementsScreen() {
   const theme = useTheme();
 
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
-  const { settlements, availableMonths } = useSettlements(selectedMonth);
-  const sections = groupByDate(settlements);
+  const { settlementsCurrentMonth, availableMonths } = useSettlements(selectedMonth);
+  const sections = groupByDate(settlementsCurrentMonth);
 
   const idx = availableMonths.indexOf(selectedMonth);
   const hasPrev = idx < availableMonths.length - 1;
@@ -91,7 +91,7 @@ export default function SettlementsScreen() {
           />
         </TouchableRipple>
       </View>
-      {settlements.length === 0 ? (
+      {settlementsCurrentMonth.length === 0 ? (
         <View style={styles.empty}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             No settlements yet.
