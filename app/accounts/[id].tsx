@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, TextInput as RNTextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import {
   Button,
@@ -18,6 +18,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useAccounts } from '@/hooks/useAccounts';
 import { ACCOUNT_TYPE_META } from '@/constants/accounts';
 import { PRESET_COLORS } from '@/constants/categories';
+import { CURRENCY_SYMBOL } from '@/utils/currency';
 
 type AccountType = 'current' | 'credit_card' | 'savings' | 'cash';
 
@@ -36,13 +37,13 @@ export default function AccountFormScreen() {
   const [startingBalance, setStartingBalance] = useState('0');
   const [creditLimit, setCreditLimit] = useState('');
   const [connectedAccountId, setConnectedAccountId] = useState<number | null>(null);
-  const currencyRef = useRef<RNTextInput>(null);
   const numericRef = useRef<RNTextInput>(null);
 
   const [saving, setSaving] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteBlockedDialogVisible, setDeleteBlockedDialogVisible] = useState(false);
   const [connectedPickerVisible, setConnectedPickerVisible] = useState(false);
+  const [currencyPickerVisible, setCurrencyPickerVisible] = useState(false);
 
   // Pre-fill form in edit mode
   useEffect(() => {
@@ -137,8 +138,37 @@ export default function AccountFormScreen() {
           style={styles.input}
           autoCapitalize="words"
           returnKeyType="next"
-          onSubmitEditing={() => currencyRef.current?.focus()}
+          onSubmitEditing={() => numericRef.current?.focus()}
         />
+
+        {/* Starting balance (not applicable for credit cards) */}
+        {type !== 'credit_card' && (
+          <TextInput
+            ref={numericRef}
+            label="Starting Balance"
+            value={startingBalance}
+            onChangeText={setStartingBalance}
+            mode="outlined"
+            style={styles.input}
+            keyboardType="numeric"
+            returnKeyType="done"
+          />
+        )}
+
+        {/* Credit limit (credit card only) */}
+        {type === 'credit_card' && (
+          <TextInput
+            ref={numericRef}
+            label="Credit Limit"
+            value={creditLimit}
+            onChangeText={setCreditLimit}
+            mode="outlined"
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder="Optional"
+            returnKeyType="done"
+          />
+        )}
 
         {/* Account type */}
         <Text variant="labelLarge" style={styles.sectionLabel}>
@@ -184,19 +214,19 @@ export default function AccountFormScreen() {
           })}
         </View>
 
-        {/* Currency */}
-        <TextInput
-          ref={currencyRef}
-          label="Currency"
-          value={currency}
-          onChangeText={setCurrency}
-          mode="outlined"
-          style={styles.input}
-          autoCapitalize="characters"
-          maxLength={3}
-          returnKeyType="next"
-          onSubmitEditing={() => numericRef.current?.focus()}
-        />
+        {/* Currency picker */}
+        <Pressable onPress={() => setCurrencyPickerVisible(true)}>
+          <View pointerEvents="none">
+            <TextInput
+              label="Currency"
+              value={currency}
+              mode="outlined"
+              editable={false}
+              style={styles.input}
+              right={<TextInput.Icon icon="chevron-down" />}
+            />
+          </View>
+        </Pressable>
 
         {/* Color picker */}
         <Text variant="labelLarge" style={styles.sectionLabel}>
@@ -223,35 +253,6 @@ export default function AccountFormScreen() {
             </TouchableRipple>
           ))}
         </View>
-
-        {/* Starting balance (not applicable for credit cards) */}
-        {type !== 'credit_card' && (
-          <TextInput
-            ref={numericRef}
-            label="Starting Balance"
-            value={startingBalance}
-            onChangeText={setStartingBalance}
-            mode="outlined"
-            style={styles.input}
-            keyboardType="numeric"
-            returnKeyType="done"
-          />
-        )}
-
-        {/* Credit limit (credit card only) */}
-        {type === 'credit_card' && (
-          <TextInput
-            ref={numericRef}
-            label="Credit Limit"
-            value={creditLimit}
-            onChangeText={setCreditLimit}
-            mode="outlined"
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Optional"
-            returnKeyType="done"
-          />
-        )}
 
         {/* Connected account (credit card only) */}
         {type === 'credit_card' && (
@@ -295,6 +296,40 @@ export default function AccountFormScreen() {
       </KeyboardAwareScrollView>
 
       <Portal>
+        {/* Currency picker */}
+        <Dialog visible={currencyPickerVisible} onDismiss={() => setCurrencyPickerVisible(false)}>
+          <Dialog.Title>Currency</Dialog.Title>
+          <Dialog.ScrollArea style={styles.dialogScrollArea}>
+            <ScrollView>
+              <RadioButton.Group
+                value={currency}
+                onValueChange={(v) => {
+                  setCurrency(v);
+                  setCurrencyPickerVisible(false);
+                }}
+              >
+                {Object.keys(CURRENCY_SYMBOL).map((code) => (
+                  <TouchableRipple
+                    key={code}
+                    onPress={() => {
+                      setCurrency(code);
+                      setCurrencyPickerVisible(false);
+                    }}
+                  >
+                    <View style={styles.pickerRow}>
+                      <Text style={styles.flex1}>{code}</Text>
+                      <RadioButton value={code} />
+                    </View>
+                  </TouchableRipple>
+                ))}
+              </RadioButton.Group>
+            </ScrollView>
+          </Dialog.ScrollArea>
+          <Dialog.Actions>
+            <Button onPress={() => setCurrencyPickerVisible(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+
         {/* Connected account picker */}
         <Dialog visible={connectedPickerVisible} onDismiss={() => setConnectedPickerVisible(false)}>
           <Dialog.Title>Connected Account</Dialog.Title>

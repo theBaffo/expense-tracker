@@ -1,4 +1,4 @@
-const CURRENCY_SYMBOL: Record<string, string> = {
+export const CURRENCY_SYMBOL: Record<string, string> = {
   EUR: '€',
   USD: '$',
   GBP: '£',
