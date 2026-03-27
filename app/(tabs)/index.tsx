@@ -89,7 +89,7 @@ export default function DashboardScreen() {
   } = useDashboard(selectedMonth);
 
   const idx = availableMonths.indexOf(selectedMonth);
-  
+
   // availableMonths is sorted descending: higher index = older month
   const hasPrev = idx < availableMonths.length - 1;
   const hasNext = idx > 0;
@@ -99,7 +99,7 @@ export default function DashboardScreen() {
   navRef.current.goPrev = () => {
     if (hasPrev) setSelectedMonth(availableMonths[idx + 1]);
   };
-  
+
   navRef.current.goNext = () => {
     if (hasNext) setSelectedMonth(availableMonths[idx - 1]);
   };
