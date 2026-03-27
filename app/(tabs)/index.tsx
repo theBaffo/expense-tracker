@@ -89,6 +89,7 @@ export default function DashboardScreen() {
   } = useDashboard(selectedMonth);
 
   const idx = availableMonths.indexOf(selectedMonth);
+  
   // availableMonths is sorted descending: higher index = older month
   const hasPrev = idx < availableMonths.length - 1;
   const hasNext = idx > 0;
@@ -98,6 +99,7 @@ export default function DashboardScreen() {
   navRef.current.goPrev = () => {
     if (hasPrev) setSelectedMonth(availableMonths[idx + 1]);
   };
+  
   navRef.current.goNext = () => {
     if (hasNext) setSelectedMonth(availableMonths[idx - 1]);
   };
@@ -138,7 +140,7 @@ export default function DashboardScreen() {
                 <Icon
                   source="chevron-left"
                   size={20}
-                  color={hasPrev ? theme.colors.onSurface : theme.colors.background}
+                  color={hasPrev ? theme.colors.onSurface : theme.colors.surface}
                 />
               </TouchableRipple>
               <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -153,7 +155,7 @@ export default function DashboardScreen() {
                 <Icon
                   source="chevron-right"
                   size={20}
-                  color={hasNext ? theme.colors.onSurface : theme.colors.background}
+                  color={hasNext ? theme.colors.onSurface : theme.colors.surface}
                 />
               </TouchableRipple>
             </View>
