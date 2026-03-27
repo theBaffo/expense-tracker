@@ -118,15 +118,10 @@ export default function TransactionsScreen() {
           )}
           renderItem={({ item, index, section }) => (
             <>
-              <TouchableRipple onPress={() => router.push(`/transactions/${item.id}` as never)}>
-                <View style={styles.row}>
-                  <View
-                    style={[
-                      styles.iconBadge,
-                      { backgroundColor: item.categoryColorHex ?? theme.colors.surfaceVariant },
-                    ]}
-                  >
-                    <Icon source={item.categoryIcon ?? 'tag-outline'} size={18} color="white" />
+              {item.transferPairId != null ? (
+                <View style={[styles.row, { backgroundColor: theme.colors.surfaceVariant }]}>
+                  <View style={[styles.iconBadge, { backgroundColor: theme.colors.outline }]}>
+                    <Icon source="swap-horizontal" size={18} color="white" />
                   </View>
                   <View style={styles.rowContent}>
                     <Text variant="bodyMedium" numberOfLines={1}>
@@ -139,14 +134,44 @@ export default function TransactionsScreen() {
                   <Text
                     variant="bodyMedium"
                     style={{
-                      color: item.amount < 0 ? theme.colors.error : '#43A047',
+                      color: theme.colors.onSurfaceVariant,
                       fontVariant: ['tabular-nums'],
                     }}
                   >
                     {formatAmount(item.amount, item.accountCurrency)}
                   </Text>
                 </View>
-              </TouchableRipple>
+              ) : (
+                <TouchableRipple onPress={() => router.push(`/transactions/${item.id}` as never)}>
+                  <View style={styles.row}>
+                    <View
+                      style={[
+                        styles.iconBadge,
+                        { backgroundColor: item.categoryColorHex ?? theme.colors.surfaceVariant },
+                      ]}
+                    >
+                      <Icon source={item.categoryIcon ?? 'tag-outline'} size={18} color="white" />
+                    </View>
+                    <View style={styles.rowContent}>
+                      <Text variant="bodyMedium" numberOfLines={1}>
+                        {item.description}
+                      </Text>
+                      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                        {item.accountName}
+                      </Text>
+                    </View>
+                    <Text
+                      variant="bodyMedium"
+                      style={{
+                        color: item.amount < 0 ? theme.colors.error : '#43A047',
+                        fontVariant: ['tabular-nums'],
+                      }}
+                    >
+                      {formatAmount(item.amount, item.accountCurrency)}
+                    </Text>
+                  </View>
+                </TouchableRipple>
+              )}
               {index < section.data.length - 1 && <Divider />}
             </>
           )}

@@ -11,7 +11,7 @@ export const accounts = sqliteTable('accounts', {
   }).notNull(),
   currency: text('currency').notNull().default('EUR'),
   creditLimit: real('credit_limit'), // null for non-credit accounts
-  currentBalance: real('current_balance').notNull().default(0),
+  initialBalance: real('initial_balance').notNull().default(0),
   connectedAccountId: integer('connected_account_id'), // for credit cards: the current/savings account used to pay the bill
   colorHex: text('color_hex').notNull().default('#6750A4'),
   createdAt: text('created_at')
@@ -52,6 +52,7 @@ export const transactions = sqliteTable('transactions', {
   description: text('description').notNull(),
   transactionDate: text('transaction_date').notNull(), // ISO 8601 date string
   notes: text('notes'),
+  transferPairId: integer('transfer_pair_id'), // links the two legs of a transfer; null = regular transaction
   createdAt: text('created_at')
     .notNull()
     .default(sql`(datetime('now'))`),

@@ -5,6 +5,7 @@ import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
 import { accounts, categories, transactions } from '@/db/schema';
 import type { NewTransaction } from '@/db/schema';
+import { todayISO } from '@/utils/date';
 
 function findLatestTransaction<T extends { createdAt: string }>(rows: T[]): T | null {
   return rows.reduce<T | null>(
@@ -25,6 +26,7 @@ export function useTransactions(month?: string) {
         createdAt: transactions.createdAt,
         accountId: transactions.accountId,
         categoryId: transactions.categoryId,
+        transferPairId: transactions.transferPairId,
         accountName: accounts.name,
         accountCurrency: accounts.currency,
         categoryName: categories.name,
@@ -36,6 +38,7 @@ export function useTransactions(month?: string) {
       .leftJoin(categories, eq(transactions.categoryId, categories.id))
       .orderBy(
         desc(transactions.transactionDate),
+        sql`CASE WHEN ${transactions.transferPairId} IS NOT NULL THEN 0 ELSE 1 END`,
         sql`CASE WHEN ${transactions.amount} > 0 THEN 0 ELSE 1 END`,
         desc(sql`abs(${transactions.amount})`),
       ),
@@ -54,6 +57,52 @@ export function useTransactions(month?: string) {
 
   async function deleteTransaction(id: number) {
     await db.delete(transactions).where(eq(transactions.id, id));
+  }
+
+  async function transferBetweenAccounts(
+    fromAccountId: number,
+    fromAccountName: string,
+    toAccountId: number,
+    toAccountName: string,
+    amount: number,
+  ) {
+    const date = todayISO();
+    await db.transaction(async (tx) => {
+      // Insert the source (negative) leg first
+      await tx.insert(transactions).values({
+        accountId: fromAccountId,
+        amount: -amount,
+        description: `Transfer to ${toAccountName}`,
+        transactionDate: date,
+        categoryId: null,
+        notes: null,
+        transferPairId: null,
+      });
+
+      // Get its ID (safe inside a transaction — no concurrent writes on SQLite)
+      const [{ sourceId }] = await tx
+        .select({ sourceId: transactions.id })
+        .from(transactions)
+        .orderBy(desc(transactions.id))
+        .limit(1);
+
+      // Insert the destination (positive) leg, linked to sourceId
+      await tx.insert(transactions).values({
+        accountId: toAccountId,
+        amount,
+        description: `Transfer from ${fromAccountName}`,
+        transactionDate: date,
+        categoryId: null,
+        notes: null,
+        transferPairId: sourceId,
+      });
+
+      // Update the source leg to share the same pairId
+      await tx
+        .update(transactions)
+        .set({ transferPairId: sourceId })
+        .where(eq(transactions.id, sourceId));
+    });
   }
 
   const allTransactions = useMemo(() => data ?? [], [data]);
@@ -78,6 +127,7 @@ export function useTransactions(month?: string) {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    transferBetweenAccounts,
   };
 }
 

@@ -28,6 +28,7 @@ export function useDashboard(month?: string) {
         categoryName: categories.name,
         categoryIcon: categories.icon,
         categoryColorHex: categories.colorHex,
+        transferPairId: transactions.transferPairId,
       })
       .from(transactions)
       .leftJoin(accounts, eq(transactions.accountId, accounts.id))
@@ -77,7 +78,7 @@ export function useDashboard(month?: string) {
   // ── 2. Total spent this month (absolute sum of negative amounts) ───────────
 
   const totalSpentThisMonth = thisMonthTxs
-    .filter((tx) => tx.amount < 0)
+    .filter((tx) => tx.amount < 0 && tx.transferPairId == null)
     .reduce((acc, tx) => acc + Math.abs(tx.amount), 0);
 
   // ── 3. Spending by category this month ────────────────────────────────────
@@ -92,7 +93,7 @@ export function useDashboard(month?: string) {
 
   const catMap = new Map<string, CategorySpendingRow>();
   for (const tx of thisMonthTxs) {
-    if (tx.amount >= 0) continue; // expenses only
+    if (tx.amount >= 0 || tx.transferPairId != null) continue; // expenses only, exclude transfers
     const key = tx.categoryId != null ? String(tx.categoryId) : 'uncategorized';
     if (!catMap.has(key)) {
       catMap.set(key, {
@@ -152,7 +153,7 @@ export function useDashboard(month?: string) {
     const balance =
       account.type === 'credit_card'
         ? -txSum - incoming
-        : account.currentBalance + txSum - outgoing;
+        : account.initialBalance + txSum - outgoing;
     return { ...account, balance };
   });
 

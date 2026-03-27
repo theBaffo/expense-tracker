@@ -11,20 +11,20 @@ export const DEFAULT_ACCOUNTS = [
     type: 'cash' as const,
     currency: 'EUR',
     colorHex: '#43A047',
-    currentBalance: 0,
+    initialBalance: 0,
   },
   {
     name: 'Main Account',
     type: 'current' as const,
     currency: 'EUR',
     colorHex: '#1E88E5',
-    currentBalance: 0,
+    initialBalance: 0,
   },
   {
     name: 'Credit Card',
     type: 'credit_card' as const,
     currency: 'EUR',
     colorHex: '#E53935',
-    currentBalance: 0,
+    initialBalance: 0,
   },
 ];

@@ -54,7 +54,7 @@ export default function AccountFormScreen() {
       setType(account.type as AccountType);
       setCurrency(account.currency);
       setColorHex(account.colorHex);
-      setStartingBalance(String(account.currentBalance));
+      setStartingBalance(String(account.initialBalance));
       setCreditLimit(account.creditLimit != null ? String(account.creditLimit) : '');
       setConnectedAccountId(account.connectedAccountId ?? null);
     }
@@ -69,7 +69,7 @@ export default function AccountFormScreen() {
         type,
         currency: currency.trim().toUpperCase() || 'EUR',
         colorHex,
-        currentBalance: parseFloat(startingBalance) || 0,
+        initialBalance: parseFloat(startingBalance) || 0,
         creditLimit: type === 'credit_card' && creditLimit ? parseFloat(creditLimit) : null,
         connectedAccountId: type === 'credit_card' ? connectedAccountId : null,
       };
